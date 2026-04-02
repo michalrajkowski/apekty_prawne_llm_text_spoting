@@ -2,6 +2,9 @@
 
 Active execution queue for the chunking research repository.
 
+For any new dataset integration task, follow
+`docs/INTEGRATING_NEW_DATASET.md` before implementation.
+
 ## How To Use
 
 1. Select the top item from `Queue`.
@@ -31,33 +34,6 @@ Active execution queue for the chunking research repository.
 - `Test Plan`: agreed red-green test scope and validation strategy.
 
 ## Queue
-
-### Task 004 - Kaggle LLM Detect AI Generated Text adapter integration
-
-Dataset Link:
-- https://www.kaggle.com/competitions/llm-detect-ai-generated-text/data
-
-Scope:
-- Analyze available files/columns and label semantics.
-- Define Kaggle dataset config in `configs/datasets/`.
-- Implement Kaggle loader adapter using universal interface.
-- Validate normalized output and label mapping.
-
-Acceptance Criteria:
-- Field audit and label interpretation are documented.
-- Adapter supports configured file/split selection.
-- Label mapping to canonical human/ai labels is explicit and tested.
-- Output matches canonical schema and persists to normalized storage.
-- Deterministic subset sampling works with seed.
-
-Decision Notes:
-- Treat source acquisition/auth separately from parsing logic.
-- Keep local file-path based input for reproducible offline reruns.
-
-Test Plan:
-- Add adapter tests for file parsing and label mapping.
-- Add deterministic sampling test for Kaggle adapter output IDs.
-- Add validation test against canonical schema.
 
 ### Task 005 - GriD dataset adapter integration
 

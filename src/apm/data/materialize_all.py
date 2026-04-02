@@ -9,6 +9,9 @@ from pathlib import Path
 from typing import Callable
 
 from apm.data.adapters.hc3_materialize import MaterializedSplitOutput, materialize_hc3_samples
+from apm.data.adapters.kaggle_llm_detect_ai_generated_text_materialize import (
+    materialize_kaggle_llm_detect_ai_generated_text_samples,
+)
 
 MaterializerFn = Callable[[Path, Path, int, int], tuple[MaterializedSplitOutput, ...]]
 
@@ -37,6 +40,7 @@ def default_materializer_registry() -> dict[str, MaterializerFn]:
 
     return {
         "hc3": materialize_hc3_samples,
+        "kaggle_llm_detect_ai_generated_text": materialize_kaggle_llm_detect_ai_generated_text_samples,
     }
 
 
@@ -203,7 +207,12 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional text file with dataset ids (one per line, '#' comments allowed).",
     )
-    parser.add_argument("--sample-size", type=int, default=100, help="Sample size for each materialized split/selector.")
+    parser.add_argument(
+        "--sample-size",
+        type=int,
+        default=100,
+        help="Target sample size per label (`human` and `ai`) for each materialized split/selector.",
+    )
     parser.add_argument("--seed", type=int, default=42, help="Deterministic sampling seed.")
     return parser
 

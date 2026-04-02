@@ -72,3 +72,29 @@ def test_load_dataset_rejects_unknown_split() -> None:
             request=DatasetLoadRequest(dataset_id=dataset_id, split="missing", sample_size=1, seed=42),
             registry=registry,
         )
+
+
+def test_load_dataset_balanced_sampling_uses_per_label_target() -> None:
+    dataset_id = "demo_dataset"
+    registry = DatasetRegistry()
+    adapter = InMemoryAdapter(
+        dataset_id=dataset_id,
+        split_to_records={"train": _build_records(dataset_id, "train", 7)},
+    )
+    registry.register(dataset_id=dataset_id, adapter=adapter)
+
+    result = load_dataset(
+        request=DatasetLoadRequest(
+            dataset_id=dataset_id,
+            split="train",
+            per_label_sample_size=2,
+            seed=123,
+            sampling_strategy="balanced_random",
+        ),
+        registry=registry,
+    )
+
+    labels = [record.label for record in result.records]
+    assert result.sampled_count == 4
+    assert labels.count("human") == 2
+    assert labels.count("ai") == 2

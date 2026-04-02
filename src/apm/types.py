@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import Any, Literal
 
 DatasetLabel = Literal["human", "ai"]
-SamplingStrategy = Literal["random"]
+SamplingStrategy = Literal["random", "balanced_random"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -28,6 +28,7 @@ class DatasetLoadRequest:
     dataset_id: str
     split: str | None = None
     sample_size: int | None = None
+    per_label_sample_size: int | None = None
     seed: int = 42
     sampling_strategy: SamplingStrategy = "random"
 

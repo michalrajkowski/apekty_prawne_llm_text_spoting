@@ -22,7 +22,9 @@ Dataset config schema and template:
 Normalized artifacts convention:
 
 - raw snapshot directories: `data/raw/datasets/<dataset_id>/<split>/`
+- raw class-partitioned snapshots: `data/raw/datasets/<dataset_id>/<split>/<label>/sampled_records.jsonl`
 - normalized split outputs: `data/interim/datasets/<dataset_id>/<split>.parquet`
+- normalized class-partitioned outputs: `data/interim/datasets/<dataset_id>/<split>/<label>/sampled_records.parquet`
 - metadata sidecar: `data/interim/datasets/<dataset_id>/<split>.metadata.json`
 
 ## HC3 Materialization
@@ -32,7 +34,7 @@ HC3 adapter configuration and field audit:
 - `configs/datasets/hc3.dataset.json`
 - `configs/datasets/hc3_field_audit.md`
 
-Materialize sampled HC3 outputs (default: `100` per selector, deterministic `seed=42`):
+Materialize sampled HC3 outputs (default: balanced `100 human + 100 ai` per selector where available, deterministic `seed=42`):
 
 ```bash
 PYTHONPATH=src python -m apm.data.adapters.hc3_materialize \
@@ -40,6 +42,56 @@ PYTHONPATH=src python -m apm.data.adapters.hc3_materialize \
   --config configs/datasets/hc3.dataset.json \
   --sample-size 100 \
   --seed 42
+```
+
+## Kaggle LLM Detect AI Generated Text Materialization
+
+Kaggle adapter configuration and field audit:
+
+- `configs/datasets/kaggle_llm_detect_ai_generated_text.dataset.json`
+- `configs/datasets/kaggle_llm_detect_ai_generated_text_field_audit.md`
+
+Materialize sampled Kaggle outputs (default: `100` per configured split, deterministic `seed=42`):
+
+```bash
+PYTHONPATH=src python -m apm.data.adapters.kaggle_llm_detect_ai_generated_text_materialize \
+  --project-root . \
+  --config configs/datasets/kaggle_llm_detect_ai_generated_text.dataset.json \
+  --sample-size 100 \
+  --seed 42
+```
+
+Kaggle/HC3 materializers support `--sampling-strategy`:
+
+- `balanced_random` (default): target `sample-size` per label (`human`, `ai`)
+- `random`: legacy total-random sampling behavior
+
+If configured source files are missing, Kaggle adapter/materializer will auto-download them using the
+`download` block from dataset config. Prerequisites:
+
+- `kaggle` CLI installed,
+- valid Kaggle credentials in `~/.kaggle/kaggle.json`.
+
+Credential bootstrap for this repository:
+
+1. Copy template:
+```bash
+cp configs/credentials/kaggle.example.json configs/credentials/kaggle.json
+```
+2. Fill real values in `configs/credentials/kaggle.json` (this file is gitignored).
+3. Install to Kaggle CLI location:
+```bash
+mkdir -p ~/.kaggle
+cp configs/credentials/kaggle.json ~/.kaggle/kaggle.json
+chmod 600 ~/.kaggle/kaggle.json
+```
+
+Download-only bootstrap command:
+
+```bash
+PYTHONPATH=src python -m apm.data.adapters.kaggle_llm_detect_ai_generated_text_download \
+  --project-root . \
+  --config configs/datasets/kaggle_llm_detect_ai_generated_text.dataset.json
 ```
 
 ## Bulk Dataset Init
@@ -53,6 +105,8 @@ PYTHONPATH=src python -m apm.data.materialize_all \
   --sample-size 100 \
   --seed 42
 ```
+
+In bulk mode, `--sample-size` is interpreted as per-label target for balanced sampling.
 
 Limit execution to selected dataset ids:
 

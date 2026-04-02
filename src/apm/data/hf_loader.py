@@ -45,6 +45,7 @@ def load_dataset(request: DatasetLoadRequest, registry: DatasetRegistry = DATASE
     sampled_records = sample_records(
         records=records,
         sample_size=request.sample_size,
+        per_label_sample_size=request.per_label_sample_size,
         seed=request.seed,
         sampling_strategy=request.sampling_strategy,
     )

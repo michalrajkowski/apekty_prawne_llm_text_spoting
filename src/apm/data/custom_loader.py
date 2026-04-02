@@ -68,6 +68,7 @@ def load_custom_jsonl(input_path: Path, request: DatasetLoadRequest) -> DatasetL
     sampled_records = sample_records(
         records=records,
         sample_size=request.sample_size,
+        per_label_sample_size=request.per_label_sample_size,
         seed=request.seed,
         sampling_strategy=request.sampling_strategy,
     )

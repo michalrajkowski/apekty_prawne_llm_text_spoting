@@ -1,14 +1,16 @@
-"""Materialize sampled HC3 selector outputs into raw/interim dataset artifacts."""
+"""Materialize Kaggle LLM Detect AI Generated Text split outputs."""
 
 from __future__ import annotations
 
 import argparse
 import json
 from collections import Counter
-from dataclasses import dataclass
 from pathlib import Path
 
-from apm.data.adapters.hc3_adapter import HC3Adapter
+from apm.data.adapters.hc3_materialize import MaterializedSplitOutput
+from apm.data.adapters.kaggle_llm_detect_ai_generated_text_adapter import (
+    KaggleLlmDetectAiGeneratedTextAdapter,
+)
 from apm.data.dataset_registry import DatasetRegistry
 from apm.data.hf_loader import load_dataset
 from apm.data.storage import (
@@ -24,27 +26,20 @@ from apm.data.storage import (
 from apm.types import DatasetLoadRequest, SamplingStrategy
 
 
-@dataclass(frozen=True, slots=True)
-class MaterializedSplitOutput:
-    """Persisted file paths for one selector materialization output."""
-
-    split: str
-    sampled_count: int
-    parquet_path: Path
-    metadata_path: Path
-    raw_snapshot_path: Path
-
-
-def materialize_hc3_samples(
+def materialize_kaggle_llm_detect_ai_generated_text_samples(
     project_root: Path,
     config_path: Path,
     sample_size: int,
     seed: int,
     sampling_strategy: SamplingStrategy = "balanced_random",
 ) -> tuple[MaterializedSplitOutput, ...]:
-    """Load HC3 selectors and persist sampled normalized outputs for each selector."""
+    """Load Kaggle CSV split(s) and persist sampled normalized outputs."""
 
-    adapter = HC3Adapter.from_config_path(config_path)
+    adapter = KaggleLlmDetectAiGeneratedTextAdapter.from_config_path(
+        config_path=config_path,
+        project_root=project_root,
+    )
+    adapter.ensure_sources_available()
     registry = DatasetRegistry()
     registry.register(dataset_id=adapter.dataset_id, adapter=adapter)
 
@@ -62,9 +57,12 @@ def materialize_hc3_samples(
             registry=registry,
         )
 
-        paths = resolve_dataset_artifact_paths(project_root=project_root, dataset_id=result.dataset_id, split=result.split)
+        paths = resolve_dataset_artifact_paths(
+            project_root=project_root,
+            dataset_id=result.dataset_id,
+            split=result.split,
+        )
         ensure_artifact_parent_dirs(paths)
-
         parquet_path = write_normalized_parquet(paths.normalized_parquet_path, list(result.records))
         raw_snapshot_path = write_raw_snapshot_jsonl(paths.raw_snapshot_dir, list(result.records))
         split_output_dir = paths.normalized_parquet_path.parent / result.split
@@ -102,19 +100,20 @@ def materialize_hc3_samples(
                 raw_snapshot_path=raw_snapshot_path,
             )
         )
+
     return tuple(outputs)
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Materialize HC3 sampled selector outputs.")
+    parser = argparse.ArgumentParser(description="Materialize Kaggle sampled split outputs.")
     parser.add_argument("--project-root", type=Path, default=Path.cwd(), help="Repository root path.")
     parser.add_argument(
         "--config",
         type=Path,
-        default=Path("configs/datasets/hc3.dataset.json"),
-        help="Path to HC3 dataset config JSON.",
+        default=Path("configs/datasets/kaggle_llm_detect_ai_generated_text.dataset.json"),
+        help="Path to Kaggle dataset config JSON.",
     )
-    parser.add_argument("--sample-size", type=int, default=100, help="Number of sampled records per selector.")
+    parser.add_argument("--sample-size", type=int, default=100, help="Number of sampled records per split.")
     parser.add_argument(
         "--sampling-strategy",
         choices=("random", "balanced_random"),
@@ -129,14 +128,13 @@ def main() -> int:
     parser = _build_parser()
     args = parser.parse_args()
 
-    outputs = materialize_hc3_samples(
+    outputs = materialize_kaggle_llm_detect_ai_generated_text_samples(
         project_root=args.project_root,
         config_path=args.config,
         sample_size=args.sample_size,
         seed=args.seed,
         sampling_strategy=args.sampling_strategy,
     )
-
     rendered = [
         {
             "split": output.split,

@@ -42,9 +42,10 @@ The objective is to measure how transformations and AI-content ratio influence d
 
 ### Add a new dataset
 
-1. Add dataset config in `configs/datasets/`.
-2. If needed, implement or extend a loader adapter in `src/apm/data/`.
-3. Register the dataset in `dataset_registry`.
+1. Follow `docs/INTEGRATING_NEW_DATASET.md`.
+2. Add dataset config in `configs/datasets/`.
+3. If needed, implement or extend a loader adapter in `src/apm/data/`.
+4. Register the dataset in `dataset_registry`.
 
 ### Add a new detector
 
@@ -64,11 +65,13 @@ The objective is to measure how transformations and AI-content ratio influence d
 1. All experiment entry points must accept and persist explicit random seeds.
 2. Every run should save resolved configs and execution metadata in `runs/<run_id>/`.
 3. Results should be reproducible when using the same code revision, submodule revisions, configs, and seed values.
+4. Dataset materialization should support balanced deterministic class sampling (`human`/`ai`) with explicit per-label target and availability-cap fallback.
 
 ## Environment and Initialization
 
 1. The project should be runnable from initialization scripts on a clean machine.
 2. Dataset initialization should be available via a bulk materialization entry point driven by dataset configs (currently `python -m apm.data.materialize_all`).
+   - Current default uses balanced per-label sampling target (`--sample-size`) for canonical labels.
 3. Dockerized workflows should mount host directories for:
    - input data (`data/`)
    - run artifacts (`runs/`)

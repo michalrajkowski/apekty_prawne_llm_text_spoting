@@ -64,3 +64,50 @@
 - Added docs for bulk init workflow and example dataset-id file:
   - `README.md`
   - `configs/datasets/datasets_to_init.example.txt`
+
+### Task 004 - Kaggle LLM Detect AI Generated Text adapter integration
+- Added Kaggle dataset config and field audit:
+  - `configs/datasets/kaggle_llm_detect_ai_generated_text.dataset.json`
+  - `configs/datasets/kaggle_llm_detect_ai_generated_text_field_audit.md`
+- Implemented Kaggle CSV adapter using the universal dataset interface:
+  - `src/apm/data/adapters/kaggle_llm_detect_ai_generated_text_adapter.py`
+  - config-driven split file selection and explicit `0 -> human`, `1 -> ai` label mapping.
+- Added Kaggle materialization runner:
+  - `src/apm/data/adapters/kaggle_llm_detect_ai_generated_text_materialize.py`
+  - persists sampled outputs with canonical parquet/jsonl + metadata artifacts.
+- Wired Kaggle into bulk materialization defaults:
+  - `src/apm/data/materialize_all.py`
+  - `configs/datasets/datasets_to_init.example.txt`
+- Added tests for config parsing, mapping, deterministic sampling, and artifact writes:
+  - `tests/test_kaggle_adapter.py`
+  - targeted suite result: `20 passed`.
+
+### Task 008 - balanced per-class sampling and split class subfolders
+- Added balanced per-class sampling strategy (`balanced_random`) in shared ingestion stack:
+  - `src/apm/types.py`
+  - `src/apm/data/sampling.py`
+  - `src/apm/data/hf_loader.py`
+  - `src/apm/data/custom_loader.py`
+- New behavior supports target `X` per canonical class (`human`, `ai`) with availability cap.
+- Updated HC3/Kaggle materializers to default to balanced sampling while keeping legacy `random` mode via CLI flag:
+  - `src/apm/data/adapters/hc3_materialize.py`
+  - `src/apm/data/adapters/kaggle_llm_detect_ai_generated_text_materialize.py`
+- Added split-level class subfolders in persisted artifacts:
+  - raw: `data/raw/datasets/<dataset>/<split>/<label>/sampled_records.jsonl`
+  - interim: `data/interim/datasets/<dataset>/<split>/<label>/sampled_records.parquet`
+  - helpers in `src/apm/data/storage.py`.
+- Metadata now records:
+  - requested per-label target,
+  - realized per-label counts,
+  - label-partitioned artifact paths.
+- Added/extended tests:
+  - `tests/test_data_sampling.py`
+  - `tests/test_hf_loader.py`
+  - `tests/test_kaggle_adapter.py`
+  - targeted suite result: `26 passed`.
+- End-to-end verification from clean outputs:
+  - removed existing HC3/Kaggle raw + interim outputs,
+  - ran one command `python -m apm.data.materialize_all --sample-size 100 --seed 42`,
+  - verified per-split label outputs:
+    - HC3 selectors: `100 human + 100 ai`,
+    - Kaggle train: `100 human + 3 ai` (availability cap from source class imbalance).

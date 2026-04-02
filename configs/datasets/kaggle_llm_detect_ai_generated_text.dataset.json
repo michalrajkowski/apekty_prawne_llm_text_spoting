@@ -1,0 +1,37 @@
+{
+  "dataset_id": "kaggle_llm_detect_ai_generated_text",
+  "source_type": "kaggle_csv_local",
+  "source_uri": "https://www.kaggle.com/competitions/llm-detect-ai-generated-text/data",
+  "sampling": {
+    "strategy": "random",
+    "seed": 42
+  },
+  "splits": {
+    "train": {
+      "path": "data/raw/datasets/kaggle_llm_detect_ai_generated_text/train_essays.csv"
+    }
+  },
+  "download": {
+    "competition": "llm-detect-ai-generated-text",
+    "output_dir": "data/raw/datasets/kaggle_llm_detect_ai_generated_text",
+    "archive_filename": "llm-detect-ai-generated-text.zip",
+    "required_files": [
+      "train_essays.csv"
+    ],
+    "auto_download_if_missing": true,
+    "force_download": false
+  },
+  "mapping": {
+    "id_field": "id",
+    "text_field": "text",
+    "label_field": "generated",
+    "optional_fields": [
+      "prompt_id"
+    ],
+    "canonical_label_mapping": {
+      "0": "human",
+      "1": "ai"
+    },
+    "sample_id_pattern": "{split}:{id}"
+  }
+}

@@ -896,3 +896,460 @@ git add and commit
 ```
 TAGS: [execution]
 ---
+2026-04-02 19:02:12
+AGENT:
+```text
+Staged all current task-related changes (excluding unrelated `Pomysły.txt`) and created commit 22ecc81 with message: feat(data): add bulk dataset initialization/materialization CLI.
+```
+---
+2026-04-02 19:05:09
+USER:
+```text
+# AGENTS.md instructions for /mnt/ssd2/studia/sem3/aspekty_prawne_miniprojekt
+
+<INSTRUCTIONS>
+# Agents.md
+
+The repository's main goal is to compare GPT/AI text detectors on benchmark datasets and custom documents, apply techniques that obfuscate/modify LLM-generated text, and verify whether those techniques make GPT detectors less confident that the text is human-written.
+
+## Prompt History
+
+1. After each user message, archive it in `prompt_history/PROMPTS_HISTORY.md`.
+2. Every archived block must include date + time only (no timezone suffix), e.g. `YYYY-MM-DD HH:MM:SS`.
+3. Assign exactly one primary intention tag for each user message (optionally add secondary tags).
+4. Use only tags from this list: `dialog`, `question`, `code_review`, `execution`, `retrieval`, `planning`, `debugging`, `creative`, `transformation`.
+
+### Non-Negotiable Prompt History Rules
+
+1. Copied user messages must be copied exactly as written.
+2. Never summarize user messages.
+3. Never correct user typos/grammar in archived user messages.
+4. Only summarize agent messages.
+5. Prompt history must look like a chat and use the exact structure below.
+
+### Required Format
+
+````md
+# Prompt History
+
+<date + timestamp>
+USER:
+```text
+<user message copied exactly>
+```
+TAGS: [<primary_tag>, <optional_secondary_tag>]
+---
+<date + timestamp>
+AGENT:
+```text
+<summarized message>
+```
+---
+````
+
+## Development Workflow
+
+1. Pull the next task from `TASKS.md` (`Queue` section).
+2. Move the task to `In Progress` and keep scope minimal.
+3. Implement the change with tests where practical (`tests/`), especially for deterministic logic.
+4. Run linting/checking only for touched Python files, and never run these tools on GitHub submodule scripts.
+5. Update docs when behavior, interfaces, workflow, or experiment conventions change.
+6. Move completed tasks to `FINISHED_TASKS.md` with completion date and short outcome.
+
+## Linting and Checking Scope
+
+1. Run linters/checkers only on Python files.
+2. Exclude GitHub submodule scripts from linting/checking runs.
+
+## Research and Reproducibility Constraints
+
+1. Treat the repository as scientific research infrastructure, not a one-off script collection.
+2. Keep project initialization reproducible via initialization files/scripts so a clean machine can bootstrap the environment.
+3. Prioritize Dockerized workflows with mounted host folders (at minimum `data/` and `runs/`) so collaborators can run experiments locally with consistent setup.
+4. Ensure experiments and text operations are reproducible by explicit seeds; do not add nondeterministic experiment paths without seed control.
+
+## Task Files Policy
+
+1. `TASKS.md` is the active execution queue and planning board.
+2. `FINISHED_TASKS.md` is the immutable archive of completed tasks.
+3. Keep task IDs stable once assigned.
+
+## Python Code Rules (Non-Negotiable)
+
+These rules must never be violated in newly created or modified Python files:
+
+1. All code must be correctly typed, including function/method signatures and return types.
+2. Imports must be declared only at the top of the file. Do not place imports inside functions/methods/branches.
+3. Every Python file must have a concise, up-to-date module docstring at the top of the file.
+4. Avoid `try`/`except` unless truly necessary. Do not add broad or flow-obscuring exception handling that makes program behavior unpredictable.
+
+</INSTRUCTIONS><environment_context>
+  <cwd>/mnt/ssd2/studia/sem3/aspekty_prawne_miniprojekt</cwd>
+  <shell>zsh</shell>
+  <current_date>2026-04-02</current_date>
+  <timezone>Europe/Warsaw</timezone>
+</environment_context>
+Write an universal integrating new dataset instruction based on the previous and next dataset integration task steps. It should be fairly small. Then add to tasks.md at the top mention that this instruction should be followed if integrating new dataset
+```
+TAGS: [execution]
+---
+2026-04-02 19:05:55
+AGENT:
+```text
+Added a short universal dataset-integration instruction file and updated TASKS.md top section to require following it for new dataset integrations.
+```
+---
+2026-04-02 19:07:13
+USER:
+```text
+this should be saved in docs folder. 
+```
+TAGS: [execution]
+---
+2026-04-02 19:07:17
+AGENT:
+```text
+Moved the universal dataset integration instruction into `docs/INTEGRATING_NEW_DATASET.md` and updated TASKS.md to reference the new location.
+```
+---
+2026-04-02 19:13:32
+USER:
+```text
+Integrate next dataset (proceed with next task)
+```
+TAGS: [execution]
+---
+2026-04-02 19:13:33
+AGENT:
+```text
+Completed Task 004 by implementing Kaggle dataset integration: added dataset config and field audit docs, created Kaggle adapter and materialization CLI, wired default bulk materialization support, added focused tests for parsing/mapping/deterministic sampling/artifact writes, ran compile checks, and passed targeted tests.
+```
+---
+2026-04-02 19:15:16
+USER:
+```text
+what are the splits and sets for kaggle dataset you just integrated
+```
+TAGS: [question]
+---
+2026-04-02 19:15:17
+AGENT:
+```text
+Clarified the currently integrated Kaggle split/set scope from the config and field audit: one configured split (`train`) mapped from `train_essays.csv`, with mention that additional competition files are not yet integrated as runnable splits.
+```
+---
+2026-04-02 19:17:31
+USER:
+```text
+command to download 100 samples
+```
+TAGS: [question]
+---
+2026-04-02 19:17:32
+AGENT:
+```text
+Provided the exact Kaggle materialization command to produce a deterministic 100-record sample using the integrated dataset adapter configuration.
+```
+---
+2026-04-02 19:19:14
+USER:
+```text
+(task_history_venv) ➜  prompt_history git:(main) ✗ PYTHONPATH=src python -m apm.data.adapters.kaggle_llm_detect_ai_generated_text_materialize \ 
+  --project-root . \
+  --config configs/datasets/kaggle_llm_detect_ai_generated_text.dataset.json \
+  --sample-size 100 \
+  --seed 42
+
+/home/noodles/.pyenv/versions/3.13.2/bin/python: Error while finding module specification for 'apm.data.adapters.kaggle_llm_detect_ai_generated_text_materialize' (ModuleNotFoundError: No module named 'apm')
+(task_history_venv) ➜  prompt_history git:(main) ✗ 
+```
+TAGS: [debugging]
+---
+2026-04-02 19:19:15
+AGENT:
+```text
+Diagnosed module import failure as incorrect working directory/PYTHONPATH resolution and provided corrected run commands for both repository root and prompt_history subdirectory contexts.
+```
+---
+2026-04-02 19:20:53
+USER:
+```text
+(task_history_venv) ➜  aspekty_prawne_miniprojekt git:(main) ✗ PYTHONPATH=src python -m apm.data.adapters.kaggle_llm_detect_ai_generated_text_materialize \
+  --project-root . \
+  --config configs/datasets/kaggle_llm_detect_ai_generated_text.dataset.json \
+  --sample-size 100 \
+  --seed 42
+<frozen runpy>:128: RuntimeWarning: 'apm.data.adapters.kaggle_llm_detect_ai_generated_text_materialize' found in sys.modules after import of package 'apm.data.adapters', but prior to execution of 'apm.data.adapters.kaggle_llm_detect_ai_generated_text_materialize'; this may result in unpredictable behaviour
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/mnt/ssd2/studia/sem3/aspekty_prawne_miniprojekt/src/apm/data/adapters/kaggle_llm_detect_ai_generated_text_materialize.py", line 127, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/mnt/ssd2/studia/sem3/aspekty_prawne_miniprojekt/src/apm/data/adapters/kaggle_llm_detect_ai_generated_text_materialize.py", line 106, in main
+    outputs = materialize_kaggle_llm_detect_ai_generated_text_samples(
+        project_root=args.project_root,
+    ...<2 lines>...
+        seed=args.seed,
+    )
+  File "/mnt/ssd2/studia/sem3/aspekty_prawne_miniprojekt/src/apm/data/adapters/kaggle_llm_detect_ai_generated_text_materialize.py", line 43, in materialize_kaggle_llm_detect_ai_generated_text_samples
+    result = load_dataset(
+        request=DatasetLoadRequest(
+    ...<5 lines>...
+        registry=registry,
+    )
+  File "/mnt/ssd2/studia/sem3/aspekty_prawne_miniprojekt/src/apm/data/hf_loader.py", line 41, in load_dataset
+    records = adapter.load_split(selected_split)
+  File "/mnt/ssd2/studia/sem3/aspekty_prawne_miniprojekt/src/apm/data/adapters/kaggle_llm_detect_ai_generated_text_adapter.py", line 282, in load_split
+    dataframe = pd.read_csv(source_path)
+  File "/home/noodles/.pyenv/versions/3.13.2/lib/python3.13/site-packages/pandas/io/parsers/readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/noodles/.pyenv/versions/3.13.2/lib/python3.13/site-packages/pandas/io/parsers/readers.py", line 620, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/noodles/.pyenv/versions/3.13.2/lib/python3.13/site-packages/pandas/io/parsers/readers.py", line 1620, in __init__
+    self._engine = self._make_engine(f, self.engine)
+                   ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/noodles/.pyenv/versions/3.13.2/lib/python3.13/site-packages/pandas/io/parsers/readers.py", line 1880, in _make_engine
+    self.handles = get_handle(
+                   ~~~~~~~~~~^
+        f,
+        ^^
+    ...<6 lines>...
+        storage_options=self.options.get("storage_options", None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/noodles/.pyenv/versions/3.13.2/lib/python3.13/site-packages/pandas/io/common.py", line 873, in get_handle
+    handle = open(
+        handle,
+    ...<3 lines>...
+        newline="",
+    )
+FileNotFoundError: [Errno 2] No such file or directory: 'data/raw/datasets/kaggle_llm_detect_ai_generated_text/train_essays.csv'
+(task_history_venv) ➜  aspekty_prawne_miniprojekt git:(main) ✗ 
+```
+TAGS: [debugging]
+---
+2026-04-02 19:20:54
+AGENT:
+```text
+Diagnosed the failure as missing local Kaggle CSV at the configured path and provided concrete download/extract steps plus optional config path override guidance.
+```
+---
+2026-04-02 19:29:35
+USER:
+```text
+the dataset loader should have this integrated unless it is impossible to do it this way. 
+
+The downloader scripts of the dataset should download them if they do not exist
+```
+TAGS: [execution]
+---
+2026-04-02 19:29:36
+AGENT:
+```text
+Implemented Kaggle source bootstrap so loader/materializer auto-download missing files via configured Kaggle CLI flow, added a dedicated download-only CLI script, extended config/docs for download settings, and added/updated tests validating auto-download and failure modes.
+```
+---
+2026-04-02 19:32:31
+USER:
+```text
+Prerequisite: kaggle CLI installed and ~/.kaggle/kaggle.json configured.
+```
+TAGS: [dialog]
+---
+2026-04-02 19:32:32
+AGENT:
+```text
+Confirmed and provided concise commands to install Kaggle CLI, place credentials in ~/.kaggle/kaggle.json with correct permissions, and verify setup.
+```
+---
+2026-04-02 19:33:43
+USER:
+```text
+and what is kaggle.json file?
+```
+TAGS: [question]
+---
+2026-04-02 19:33:44
+AGENT:
+```text
+Explained that kaggle.json is the Kaggle API credential file containing username and key, with where to download it and required filesystem location/permissions for CLI authentication.
+```
+---
+2026-04-02 19:39:01
+USER:
+```text
+my token is here:
+kaggle_key.json
+
+- add proper git ignore section + kaggle.example.json so person cloning this repo knows how to integrate it. 
+- if needed move this to some place
+- then tell me how to download the kaggle dataset with our repo (100 samples)
+```
+TAGS: [execution]
+---
+2026-04-02 19:39:02
+AGENT:
+```text
+Added Kaggle credentials ignore rules, created a tracked example credentials file, moved the real token into an ignored credentials path, updated README with setup steps, and provided repository-native commands to download/bootstrap Kaggle data and materialize deterministic 100-sample outputs.
+```
+---
+2026-04-02 19:43:40
+USER:
+```text
+verify if the dataset can be properly downloaded with its 100 example. Run the necesery cli commands. If something is missing and you are unable to get it pause and inform me. 
+
+Remember that at the end, the end the initialization script should be able to download all dataset and experimental split without user actions and one command (besides filling some env variables and config keys)
+```
+TAGS: [execution]
+---
+2026-04-02 19:43:41
+AGENT:
+```text
+Started live verification by preparing Kaggle credentials and testing API access, then paused after hitting Kaggle 401 Unauthorized because external account authorization is missing/invalid and blocks dataset download/materialization commands.
+```
+---
+2026-04-02 19:53:39
+USER:
+```text
+try again with the new key. If this aproach does not work try expirting this as export KAGGLE_API_TOKEN=
+```
+TAGS: [execution]
+---
+2026-04-02 19:53:40
+AGENT:
+```text
+Retried authentication with kaggle.json (still unauthorized), then validated access using exported environment variables (including KAGGLE_API_TOKEN + Kaggle native vars), successfully downloaded Kaggle data, materialized 100 samples, and verified one-command bulk initialization for all configured datasets.
+```
+---
+2026-04-02 19:56:40
+USER:
+```text
+is this taking random samples? Because i noteiced all are labeled as human
+```
+TAGS: [question]
+---
+2026-04-02 19:56:41
+AGENT:
+```text
+Verified label distributions in source and sampled artifacts, confirmed random deterministic sampling is active, and explained all-human sample outcome by severe class imbalance in Kaggle train set.
+```
+---
+2026-04-02 20:00:36
+USER:
+```text
+ok, we need to do a new task that will be modification for our dataset loading behaviour.
+- When it loads the samples it should load the X human and X ai samples. (or less if X is not possible). 
+
+And there should be subfolder for each data split
+human/
+ai/
+
+make new task from this
+```
+TAGS: [planning]
+---
+2026-04-02 20:00:37
+AGENT:
+```text
+Added new Task 008 at the top of TASKS.md queue for balanced per-class sampling (X human + X ai, capped by availability), deterministic behavior, and split-level `human/` and `ai/` subfolder output structure, including acceptance criteria, decision notes, and test plan.
+```
+---
+2026-04-02 20:03:42
+USER:
+```text
+the end result of this task should also be to delete current outputs, and then check if it is with a initialization script download those human and ai 100 sample for each dataset and eaech dataset section/split
+```
+TAGS: [planning]
+---
+2026-04-02 20:03:43
+AGENT:
+```text
+Updated Task 008 to include cleanup of current materialized outputs and mandatory end-to-end verification from clean state using one initialization command, with acceptance criteria for 100 human/100 ai per split where possible (capped by availability).
+```
+---
+2026-04-02 20:11:05
+USER:
+```text
+finish next task
+```
+TAGS: [execution]
+---
+2026-04-02 20:11:06
+AGENT:
+```text
+Completed Task 008 by implementing balanced per-class sampling and class subfolder outputs, updated materializers/docs/tests, removed existing outputs, and verified one-command initialization regenerates all configured dataset splits with per-label counts (including availability cap behavior).
+```
+---
+2026-04-02 20:12:42
+USER:
+```text
+command to redownload all 100?
+```
+TAGS: [question]
+---
+2026-04-02 20:12:43
+AGENT:
+```text
+Provided a single command to clean existing dataset artifacts and rerun one-command bulk initialization with per-label target 100 and required Kaggle environment exports.
+```
+---
+2026-04-02 20:16:15
+USER:
+```text
+what are the data/interim?
+```
+TAGS: [question]
+---
+2026-04-02 20:16:16
+AGENT:
+```text
+Explained that `data/interim/` stores normalized, reproducible, model-ready intermediate artifacts produced by dataset materialization (including split and label-partitioned parquet outputs plus metadata), distinct from raw downloaded source files.
+```
+---
+2026-04-02 20:16:51
+USER:
+```text
+what is the cleaning step?
+```
+TAGS: [question]
+---
+2026-04-02 20:16:52
+AGENT:
+```text
+Clarified that current cleaning is schema normalization and validation (field mapping, label normalization, required-field checks, deterministic sampling, metadata generation), not aggressive linguistic text cleaning.
+```
+---
+2026-04-02 20:19:49
+USER:
+```text
+add to git ignore all data/ you can only un-ignore the custom folder for our made texts. 
+
+then git add all necesery files / data that was made with previous tasks that is not commited yet
+
+Then propose commit message
+```
+TAGS: [execution]
+---
+2026-04-02 20:19:50
+AGENT:
+```text
+Updated gitignore to ignore all data artifacts except data/custom, untracked previously committed data artifacts from index, staged all relevant pending task files (code/config/docs/tests/prompt history), and prepared commit message proposals.
+```
+---
+2026-04-02 20:23:04
+USER:
+```text
+commit. 
+
+
+```
+TAGS: [execution]
+---
+2026-04-02 20:23:05
+AGENT:
+```text
+Committed all staged dataset/task updates with balanced sampling, Kaggle bootstrap tooling, documentation/task updates, and data artifact tracking policy changes.
+```
+---

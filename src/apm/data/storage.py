@@ -107,10 +107,25 @@ def write_raw_snapshot_jsonl(raw_snapshot_dir: Path, records: list[CanonicalData
     return snapshot_path
 
 
-def write_normalized_parquet(parquet_path: Path, records: list[CanonicalDatasetRecord]) -> Path:
-    """Persist canonical records into normalized Parquet format."""
+def write_raw_snapshot_jsonl_by_label(
+    raw_snapshot_dir: Path,
+    records: list[CanonicalDatasetRecord],
+    labels: tuple[str, ...] = ("human", "ai"),
+) -> dict[str, Path]:
+    """Persist label-partitioned JSONL snapshots under `<split>/<label>/` subfolders."""
 
-    parquet_path.parent.mkdir(parents=True, exist_ok=True)
+    paths_by_label: dict[str, Path] = {}
+    for label in labels:
+        label_records = [record for record in records if record.label == label]
+        label_dir = raw_snapshot_dir / label
+        label_dir.mkdir(parents=True, exist_ok=True)
+        label_path = write_raw_snapshot_jsonl(label_dir, label_records)
+        paths_by_label[label] = label_path
+    return paths_by_label
+
+
+def _records_to_dataframe(records: list[CanonicalDatasetRecord]) -> pd.DataFrame:
+    """Build canonical dataframe payload used by parquet writers."""
 
     rows: list[dict[str, Any]] = []
     for record in records:
@@ -124,6 +139,32 @@ def write_normalized_parquet(parquet_path: Path, records: list[CanonicalDatasetR
                 "source_fields": json.dumps(record.source_fields, ensure_ascii=False, sort_keys=True),
             }
         )
-    dataframe = pd.DataFrame(rows)
+    return pd.DataFrame(rows)
+
+
+def write_normalized_parquet(parquet_path: Path, records: list[CanonicalDatasetRecord]) -> Path:
+    """Persist canonical records into normalized Parquet format."""
+
+    parquet_path.parent.mkdir(parents=True, exist_ok=True)
+    dataframe = _records_to_dataframe(records)
     dataframe.to_parquet(parquet_path, index=False)
     return parquet_path
+
+
+def write_normalized_parquet_by_label(
+    split_output_dir: Path,
+    records: list[CanonicalDatasetRecord],
+    labels: tuple[str, ...] = ("human", "ai"),
+) -> dict[str, Path]:
+    """Persist label-partitioned parquet files under `<split>/<label>/` subfolders."""
+
+    paths_by_label: dict[str, Path] = {}
+    for label in labels:
+        label_records = [record for record in records if record.label == label]
+        label_dir = split_output_dir / label
+        label_dir.mkdir(parents=True, exist_ok=True)
+        parquet_path = label_dir / "sampled_records.parquet"
+        dataframe = _records_to_dataframe(label_records)
+        dataframe.to_parquet(parquet_path, index=False)
+        paths_by_label[label] = parquet_path
+    return paths_by_label
