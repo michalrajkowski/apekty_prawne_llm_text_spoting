@@ -42,6 +42,36 @@ PYTHONPATH=src python -m apm.data.adapters.hc3_materialize \
   --seed 42
 ```
 
+## Bulk Dataset Init
+
+Initialize/materialize all supported datasets discovered in `configs/datasets/*.dataset.json`:
+
+```bash
+PYTHONPATH=src python -m apm.data.materialize_all \
+  --project-root . \
+  --config-dir configs/datasets \
+  --sample-size 100 \
+  --seed 42
+```
+
+Limit execution to selected dataset ids:
+
+```bash
+PYTHONPATH=src python -m apm.data.materialize_all \
+  --project-root . \
+  --config-dir configs/datasets \
+  --datasets hc3
+```
+
+Or provide a dataset-id list file (`#` comments allowed):
+
+```bash
+PYTHONPATH=src python -m apm.data.materialize_all \
+  --project-root . \
+  --config-dir configs/datasets \
+  --datasets-file configs/datasets/datasets_to_init.example.txt
+```
+
 ## Prompt History Viewer
 
 Task history viewer is isolated under `prompt_history/` and generates a static HTML chat view from `prompt_history/PROMPTS_HISTORY.md`.

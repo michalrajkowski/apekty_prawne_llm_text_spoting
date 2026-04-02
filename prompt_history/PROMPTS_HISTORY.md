@@ -850,3 +850,49 @@ AGENT:
 Staged Task 003-related files (adapter refactor to `datasets` library, adapter-folder reorganization, task/docs updates, generated HC3 artifacts/reports, tests, and prompt history updates) while leaving unrelated `Pomysły.txt` unstaged, then proposed a commit message.
 ```
 ---
+2026-04-02 18:51:05
+USER:
+```text
+commit 
+```
+TAGS: [execution]
+---
+2026-04-02 18:51:10
+AGENT:
+```text
+Created commit d23d0c5 from staged Task 003 files with the agreed message and reported that only unrelated `Pomysły.txt` remains untracked.
+```
+---
+2026-04-02 18:52:51
+USER:
+```text
+Is there some cli loader for the dataset? And possibly some initialization script to using some config / predefined split / txt file download all datasets
+```
+TAGS: [question]
+---
+2026-04-02 18:52:58
+AGENT:
+```text
+Checked repository entry points and clarified that there is a dataset-specific CLI for HC3 materialization, but no generic "download/materialize all datasets from config" initialization script yet; proposed a practical next script shape.
+```
+---
+2026-04-02 18:54:48
+USER:
+```text
+make new task with this init script, then implement it. 
+```
+TAGS: [execution]
+---
+2026-04-02 18:59:51
+AGENT:
+```text
+Created and completed new Task 007 for a generic dataset init/materialization CLI; implemented `src/apm/data/materialize_all.py` with config discovery, dataset selection via `--datasets` or `--datasets-file`, adapter materializer dispatch, deterministic sample/seed forwarding, unsupported-dataset handling, and JSON reporting; added tests (`tests/test_materialize_all.py`), docs/examples (`README.md`, `configs/datasets/datasets_to_init.example.txt`), updated architecture/task files, and verified with targeted tests (16 passed) plus real CLI run for `hc3`.
+```
+---
+2026-04-02 19:01:54
+USER:
+```text
+git add and commit
+```
+TAGS: [execution]
+---

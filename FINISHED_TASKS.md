@@ -45,3 +45,22 @@
 - Added HC3 adapter tests with mock dataset loader:
   - `tests/test_hc3_adapter.py` (`12` total targeted tests passed with existing data tests).
 - Generated validation report and persisted sampled outputs for all configured HC3 selectors.
+
+### Task 007 - dataset initialization and bulk materialization CLI
+- Added bulk dataset initialization/materialization CLI:
+  - `src/apm/data/materialize_all.py`
+  - command: `python -m apm.data.materialize_all`
+- Implemented config-driven discovery from `configs/datasets/*.dataset.json` with `dataset_id` resolution.
+- Added dataset selection controls:
+  - `--datasets` CLI argument (space-separated dataset ids),
+  - `--datasets-file` text file support (one dataset id per line, `#` comments allowed).
+- Implemented orchestration logic:
+  - runs all supported datasets by default,
+  - skips unsupported discovered datasets in default mode and reports them,
+  - fails fast for explicitly requested missing/unsupported datasets.
+- Reused per-dataset materializers through registry dispatch (currently `hc3`).
+- Added tests for orchestration and selection logic:
+  - `tests/test_materialize_all.py`
+- Added docs for bulk init workflow and example dataset-id file:
+  - `README.md`
+  - `configs/datasets/datasets_to_init.example.txt`

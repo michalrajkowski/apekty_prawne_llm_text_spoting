@@ -68,8 +68,9 @@ The objective is to measure how transformations and AI-content ratio influence d
 ## Environment and Initialization
 
 1. The project should be runnable from initialization scripts on a clean machine.
-2. Dockerized workflows should mount host directories for:
+2. Dataset initialization should be available via a bulk materialization entry point driven by dataset configs (currently `python -m apm.data.materialize_all`).
+3. Dockerized workflows should mount host directories for:
    - input data (`data/`)
    - run artifacts (`runs/`)
    - optional caches
-3. Initialization scripts should prepare dependencies, required folders, and baseline config state.
+4. Initialization scripts should prepare dependencies, required folders, and baseline config state.
