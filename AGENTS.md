@@ -4,7 +4,7 @@ The repository's main goal is to compare GPT/AI text detectors on benchmark data
 
 ## Prompt History
 
-- After each user message, archive it in `PROMPTS_HISTORY.txt`.
+- After each user message, archive it in `PROMPTS_HISTORY.md`.
 - Add the date of sending to the archived user message.
 - Before generating a new response, first add a very short summary of the agent's previous response, so entries look like a dialog.
 - Assign exactly one primary intention tag for each user message.
@@ -33,6 +33,13 @@ The repository's main goal is to compare GPT/AI text detectors on benchmark data
 
 1. Run linters/checkers only on Python files.
 2. Exclude GitHub submodule scripts from linting/checking runs.
+
+## Research and Reproducibility Constraints
+
+1. Treat the repository as scientific research infrastructure, not a one-off script collection.
+2. Keep project initialization reproducible via initialization files/scripts so a clean machine can bootstrap the environment.
+3. Prioritize Dockerized workflows with mounted host folders (at minimum `data/` and `runs/`) so collaborators can run experiments locally with consistent setup.
+4. Ensure experiments and text operations are reproducible by explicit seeds; do not add nondeterministic experiment paths without seed control.
 
 ## Task Files Policy
 
