@@ -111,3 +111,25 @@
   - verified per-split label outputs:
     - HC3 selectors: `100 human + 100 ai`,
     - Kaggle train: `100 human + 3 ai` (availability cap from source class imbalance).
+
+### Task 005 - GriD dataset adapter integration
+- Added GriD dataset config and field audit:
+  - `configs/datasets/grid.dataset.json`
+  - `configs/datasets/grid_field_audit.md`
+- Implemented GriD CSV adapter with config-driven split mapping and GitHub raw auto-download bootstrap:
+  - `src/apm/data/adapters/grid_adapter.py`
+  - canonical mapping: `Data -> text`, `Labels 0 -> human`, `Labels 1 -> ai`.
+- Added GriD download and materialization CLIs:
+  - `src/apm/data/adapters/grid_download.py`
+  - `src/apm/data/adapters/grid_materialize.py`
+- Wired GriD into bulk initializer registry:
+  - `src/apm/data/materialize_all.py`
+  - `configs/datasets/datasets_to_init.example.txt`
+- Added focused adapter/downloader/materialization tests:
+  - `tests/test_grid_adapter.py`
+  - targeted suite result after integration updates: `33 passed`.
+- Finishing validation (live run):
+  - cleaned previous GriD artifacts, ran download CLI and materialize CLI,
+  - verified both configured splits/sectors (`filtered`, `unfiltered`),
+  - verified per-split `human/` and `ai/` JSONL outputs with `100` lines each,
+  - verified per-split label-partitioned parquet outputs and metadata counts.

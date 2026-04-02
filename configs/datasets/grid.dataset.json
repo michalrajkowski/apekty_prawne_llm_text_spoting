@@ -1,0 +1,43 @@
+{
+  "dataset_id": "grid",
+  "source_type": "github_csv_http",
+  "source_uri": "https://github.com/madlab-ucr/GriD",
+  "sampling": {
+    "strategy": "random",
+    "seed": 42
+  },
+  "splits": {
+    "filtered": {
+      "path": "data/raw/datasets/grid/reddit_filtered_dataset.csv"
+    },
+    "unfiltered": {
+      "path": "data/raw/datasets/grid/reddit_unfiltered_data.csv"
+    }
+  },
+  "download": {
+    "output_dir": "data/raw/datasets/grid",
+    "files": [
+      {
+        "name": "reddit_filtered_dataset.csv",
+        "url": "https://raw.githubusercontent.com/madlab-ucr/GriD/main/reddit_datasets/reddit_filtered_dataset.csv"
+      },
+      {
+        "name": "reddit_unfiltered_data.csv",
+        "url": "https://raw.githubusercontent.com/madlab-ucr/GriD/main/reddit_datasets/reddit_unfiltered_data.csv"
+      }
+    ],
+    "auto_download_if_missing": true,
+    "force_download": false
+  },
+  "mapping": {
+    "id_field": null,
+    "text_field": "Data",
+    "label_field": "Labels",
+    "optional_fields": [],
+    "canonical_label_mapping": {
+      "0": "human",
+      "1": "ai"
+    },
+    "sample_id_pattern": "{split}:{row_index}"
+  }
+}

@@ -1353,3 +1353,56 @@ AGENT:
 Committed all staged dataset/task updates with balanced sampling, Kaggle bootstrap tooling, documentation/task updates, and data artifact tracking policy changes.
 ```
 ---
+2026-04-02 20:24:08
+USER:
+```text
+Verify the none of the commit contains the kaggle dataset artifact. Look at commit histoty added files
+```
+TAGS: [retrieval]
+---
+2026-04-02 20:24:09
+AGENT:
+```text
+Audited commit history and object list for Kaggle raw/interim artifact paths and file names, confirmed no Kaggle dataset artifacts were ever committed, and summarized current tracked data files and Kaggle-related committed code/config files.
+```
+---
+2026-04-02 20:32:58
+USER:
+```text
+finish the next task (005).
+Make sure the finishing validation of this step would be that it correctly downloaded the jsons of the dataset for all splits / sectors and ai / human
+```
+TAGS: [execution]
+---
+2026-04-02 20:32:59
+AGENT:
+```text
+Completed Task 005 by integrating GriD adapter/downloader/materializer with config-driven split mapping and label normalization, added tests and registry/docs/task updates, and validated live download + materialization for all GriD splits with per-split `human/` and `ai/` JSONL outputs.
+```
+---
+2026-04-02 20:38:59
+USER:
+```text
+git add + commit message
+```
+TAGS: [execution]
+---
+2026-04-02 20:39:00
+AGENT:
+```text
+Staged all current Task 005 and related integration changes (excluding unrelated files) and proposed a concise commit message for the completed GriD integration and docs/task updates.
+```
+---
+2026-04-02 20:41:34
+USER:
+```text
+commit
+```
+TAGS: [execution]
+---
+2026-04-02 20:41:35
+AGENT:
+```text
+Committed staged Task 005 GriD integration changes with the proposed message and reported resulting repository status.
+```
+---

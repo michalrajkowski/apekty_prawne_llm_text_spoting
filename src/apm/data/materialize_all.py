@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
+from apm.data.adapters.grid_materialize import materialize_grid_samples
 from apm.data.adapters.hc3_materialize import MaterializedSplitOutput, materialize_hc3_samples
 from apm.data.adapters.kaggle_llm_detect_ai_generated_text_materialize import (
     materialize_kaggle_llm_detect_ai_generated_text_samples,
@@ -40,6 +41,7 @@ def default_materializer_registry() -> dict[str, MaterializerFn]:
 
     return {
         "hc3": materialize_hc3_samples,
+        "grid": materialize_grid_samples,
         "kaggle_llm_detect_ai_generated_text": materialize_kaggle_llm_detect_ai_generated_text_samples,
     }
 

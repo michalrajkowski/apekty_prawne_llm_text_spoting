@@ -2,4 +2,5 @@
 # Lines starting with # are ignored.
 
 hc3
+grid
 kaggle_llm_detect_ai_generated_text

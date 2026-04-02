@@ -61,6 +61,31 @@ PYTHONPATH=src python -m apm.data.adapters.kaggle_llm_detect_ai_generated_text_m
   --seed 42
 ```
 
+## GriD Materialization
+
+GriD adapter configuration and field audit:
+
+- `configs/datasets/grid.dataset.json`
+- `configs/datasets/grid_field_audit.md`
+
+Download-only bootstrap command:
+
+```bash
+PYTHONPATH=src python -m apm.data.adapters.grid_download \
+  --project-root . \
+  --config configs/datasets/grid.dataset.json
+```
+
+Materialize sampled GriD outputs (default: balanced `100 human + 100 ai` per split where available):
+
+```bash
+PYTHONPATH=src python -m apm.data.adapters.grid_materialize \
+  --project-root . \
+  --config configs/datasets/grid.dataset.json \
+  --sample-size 100 \
+  --seed 42
+```
+
 Kaggle/HC3 materializers support `--sampling-strategy`:
 
 - `balanced_random` (default): target `sample-size` per label (`human`, `ai`)

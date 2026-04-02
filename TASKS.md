@@ -35,33 +35,6 @@ For any new dataset integration task, follow
 
 ## Queue
 
-### Task 005 - GriD dataset adapter integration
-
-Dataset Link:
-- https://github.com/madlab-ucr/GriD?tab=readme-ov-file
-
-Scope:
-- Analyze repository data structure and annotation format.
-- Define GriD dataset config in `configs/datasets/`.
-- Implement GriD loader adapter using universal interface.
-- Validate normalized output and label mapping.
-
-Acceptance Criteria:
-- Field/source audit is documented.
-- Adapter supports configured split/source selection.
-- Human/AI mapping is explicit and tested.
-- Output matches canonical schema and persists to normalized storage.
-- Deterministic subset sampling works with seed.
-
-Decision Notes:
-- Minimize hardcoded paths; use config-driven file resolution.
-- Preserve provenance fields in `source_fields`.
-
-Test Plan:
-- Add adapter tests for source parsing and mapping correctness.
-- Add deterministic sampling test for GriD adapter output IDs.
-- Add validation test against canonical schema.
-
 ### Task 006 - final integration and reproducibility hardening
 
 Scope:
