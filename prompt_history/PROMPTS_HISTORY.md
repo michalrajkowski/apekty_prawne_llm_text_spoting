@@ -574,3 +574,279 @@ commit
 ```
 TAGS: [execution]
 ---
+
+2026-04-02 17:44:30
+USER:
+```text
+# AGENTS.md instructions for /mnt/ssd2/studia/sem3/aspekty_prawne_miniprojekt
+
+<INSTRUCTIONS>
+# Agents.md
+
+The repository's main goal is to compare GPT/AI text detectors on benchmark datasets and custom documents, apply techniques that obfuscate/modify LLM-generated text, and verify whether those techniques make GPT detectors less confident that the text is human-written.
+
+## Prompt History
+
+1. After each user message, archive it in `prompt_history/PROMPTS_HISTORY.md`.
+2. Every archived block must include date + time only (no timezone suffix), e.g. `YYYY-MM-DD HH:MM:SS`.
+3. Assign exactly one primary intention tag for each user message (optionally add secondary tags).
+4. Use only tags from this list: `dialog`, `question`, `code_review`, `execution`, `retrieval`, `planning`, `debugging`, `creative`, `transformation`.
+
+### Non-Negotiable Prompt History Rules
+
+1. Copied user messages must be copied exactly as written.
+2. Never summarize user messages.
+3. Never correct user typos/grammar in archived user messages.
+4. Only summarize agent messages.
+5. Prompt history must look like a chat and use the exact structure below.
+
+### Required Format
+
+````md
+# Prompt History
+
+<date + timestamp>
+USER:
+```text
+<user message copied exactly>
+```
+TAGS: [<primary_tag>, <optional_secondary_tag>]
+---
+<date + timestamp>
+AGENT:
+```text
+<summarized message>
+```
+---
+````
+
+## Development Workflow
+
+1. Pull the next task from `TASKS.md` (`Queue` section).
+2. Move the task to `In Progress` and keep scope minimal.
+3. Implement the change with tests where practical (`tests/`), especially for deterministic logic.
+4. Run linting/checking only for touched Python files, and never run these tools on GitHub submodule scripts.
+5. Update docs when behavior, interfaces, workflow, or experiment conventions change.
+6. Move completed tasks to `FINISHED_TASKS.md` with completion date and short outcome.
+
+## Linting and Checking Scope
+
+1. Run linters/checkers only on Python files.
+2. Exclude GitHub submodule scripts from linting/checking runs.
+
+## Research and Reproducibility Constraints
+
+1. Treat the repository as scientific research infrastructure, not a one-off script collection.
+2. Keep project initialization reproducible via initialization files/scripts so a clean machine can bootstrap the environment.
+3. Prioritize Dockerized workflows with mounted host folders (at minimum `data/` and `runs/`) so collaborators can run experiments locally with consistent setup.
+4. Ensure experiments and text operations are reproducible by explicit seeds; do not add nondeterministic experiment paths without seed control.
+
+## Task Files Policy
+
+1. `TASKS.md` is the active execution queue and planning board.
+2. `FINISHED_TASKS.md` is the immutable archive of completed tasks.
+3. Keep task IDs stable once assigned.
+
+## Python Code Rules (Non-Negotiable)
+
+These rules must never be violated in newly created or modified Python files:
+
+1. All code must be correctly typed, including function/method signatures and return types.
+2. Imports must be declared only at the top of the file. Do not place imports inside functions/methods/branches.
+3. Every Python file must have a concise, up-to-date module docstring at the top of the file.
+4. Avoid `try`/`except` unless truly necessary. Do not add broad or flow-obscuring exception handling that makes program behavior unpredictable.
+
+</INSTRUCTIONS><environment_context>
+  <cwd>/mnt/ssd2/studia/sem3/aspekty_prawne_miniprojekt</cwd>
+  <shell>zsh</shell>
+  <current_date>2026-04-02</current_date>
+  <timezone>Europe/Warsaw</timezone>
+</environment_context>
+```
+TAGS: [execution]
+---
+2026-04-02 17:44:50
+USER:
+```text
+Lets move to the task 002 and talk about it. 
+I for now mainly want to split it into subtasks that will be used to  make dataset adapters for our repository. 
+
+View the architectural requirements. 
+In what form would be best to save the downloaded texts etc? Give options. 
+```
+TAGS: [planning, question]
+---
+2026-04-02 17:48:20
+AGENT:
+```text
+Reviewed ARCHITECTURE.md and Task 002 context, refactored Task 002 into concrete subtasks with acceptance criteria/Decision Notes/Test Plan, and proposed dataset storage strategy options with a recommended format.
+```
+---
+2026-04-02 17:55:25
+USER:
+```text
+Now split this task into separate tasks.
+
+There can be one initial task about making some scripts/code that are universal for other.
+
+For example the universal format for data, tests etc
+
+Then 3 separate tasks one per each dataset. 
+Those separate tasks should start from analyzing the dataset from the link, defining configs, making loader, then validating if it works.
+
+There can be last task additional if sth is left / needed.
+
+Write those, then lets discuss the first task. 
+```
+TAGS: [planning, execution]
+---
+2026-04-02 17:56:55
+AGENT:
+```text
+Split Task 002 into five sequential tasks in TASKS.md: universal ingestion foundation, three dataset-specific adapter tasks (HC3/Kaggle/GriD), and a final integration hardening task; then prepared concrete discussion points for Task 002 scope and implementation order.
+```
+---
+2026-04-02 18:00:57
+USER:
+```text
+modify the task to have sampling strategy "random" by default - it will take random samples, not in odrder from the split. 
+
+Then proceed with it. 
+```
+TAGS: [execution]
+---
+2026-04-02 18:07:28
+AGENT:
+```text
+Updated TASKS.md to make Task 002 default sampling strategy explicitly random; implemented universal dataset-ingestion foundations (typed schema, adapter protocol, registry, universal loader, deterministic random sampling, validation, storage/metadata helpers), added dataset config schema/template docs, added targeted tests (9 passed) plus py_compile checks, then moved Task 002 to FINISHED_TASKS.md.
+```
+---
+2026-04-02 18:14:00
+USER:
+```text
+For the Task003, i want you to at the and try load some number if fields etc 100 for each split. 
+
+Also after you analyse this dataset and make the config mappings of fields, i want you to stop with the task and tell me about the mappings, especialy fields of ai text and human text
+```
+TAGS: [execution]
+---
+2026-04-02 18:15:59
+AGENT:
+```text
+Moved Task 003 to In Progress, audited HC3 through Hugging Face dataset-server endpoints, verified loading 100 rows for each available config/train selector, created HC3 config mapping files (`configs/datasets/hc3.dataset.json`, `configs/datasets/hc3_field_audit.md`), and stopped before adapter implementation to report mapping details (human vs AI fields).
+```
+---
+2026-04-02 18:19:34
+USER:
+```text
+before finishing current task, git add files related to previous task and propose commit message
+```
+TAGS: [execution]
+---
+2026-04-02 18:19:40
+AGENT:
+```text
+Staged only files related to the previous task (Task 002 universal ingestion foundation) and left current Task 003 HC3 mapping files and unrelated files unstaged; prepared commit message proposals.
+```
+---
+2026-04-02 18:20:54
+USER:
+```text
+commit
+```
+TAGS: [execution]
+---
+2026-04-02 18:20:58
+AGENT:
+```text
+Created commit 66fa86c from the staged Task 002 files using the agreed message and reported remaining unstaged files for ongoing Task 003 and prompt history updates.
+```
+---
+2026-04-02 18:21:22
+USER:
+```text
+What is the goal of this dataset config?
+configs/datasets/hc3.dataset.json
+
+especialy the mappings at the end?
+
+  "mapping": {
+    "id_field": "id",
+    "prompt_field": "question",
+    "human_answers_field": "human_answers",
+    "ai_answers_field": "chatgpt_answers",
+    "optional_source_field": "source",
+    "explode_answer_lists": true,
+    "canonical_label_mapping": {
+      "human_answers": "human",
+      "chatgpt_answers": "ai"
+    },
+    "sample_id_pattern": "{config}:{split}:{id}:{label}:{answer_index}"
+  }
+```
+TAGS: [question]
+---
+2026-04-02 18:21:28
+AGENT:
+```text
+Explained the purpose of the HC3 dataset config and clarified each mapping key, with focus on how human and AI fields are transformed into canonical records.
+```
+---
+2026-04-02 18:27:48
+USER:
+```text
+ok, finish the implementation of this task. 
+
+After you are done tell me where the samples were saved (100 samples per split as we talked about it)
+
+
+```
+TAGS: [execution]
+---
+2026-04-02 18:33:57
+USER:
+```text
+lets pause for the maoment with your implementation and tell me how are you downloading the hf datasets. Are you doing it with the use of some python library or you are doing some weird download by link / pseudo-scrapping?
+```
+TAGS: [question]
+---
+2026-04-02 18:34:05
+AGENT:
+```text
+Paused implementation and clarified that HC3 loading currently uses the official Hugging Face datasets-server HTTP API via Python `urllib` (not HTML scraping), with note that it can be switched to the `datasets` library if preferred.
+```
+---
+2026-04-02 18:42:13
+AGENT:
+```text
+Paused implementation, then switched HC3 loading from datasets-server HTTP calls to Hugging Face `datasets.load_dataset(...)`; reorganized dataset-specific code into `src/apm/data/adapters/` (HC3 adapter and HC3 materialization runner), updated imports/docs/architecture notes, ran targeted tests (12 passed), materialized deterministic 100-sample outputs for every HC3 selector into raw/interim artifacts, generated `runs/hc3_validation_report.json`, and marked Task 003 as finished in task files.
+```
+---
+2026-04-02 18:45:50
+USER:
+```text
+what is the difference between adapter and materialyze python script in adapters? Why this split? 
+
+Why saving texts into parquets instead of jsonls?
+```
+TAGS: [question]
+---
+2026-04-02 18:45:56
+AGENT:
+```text
+Explained separation of concerns between dataset adapter and materialization runner, and clarified the rationale for Parquet as normalized experiment storage while keeping JSONL raw snapshots for audit/debug readability.
+```
+---
+2026-04-02 18:49:12
+USER:
+```text
+git add files + propose commit message
+```
+TAGS: [execution]
+---
+2026-04-02 18:49:25
+AGENT:
+```text
+Staged Task 003-related files (adapter refactor to `datasets` library, adapter-folder reorganization, task/docs updates, generated HC3 artifacts/reports, tests, and prompt history updates) while leaving unrelated `Pomysły.txt` unstaged, then proposed a commit message.
+```
+---

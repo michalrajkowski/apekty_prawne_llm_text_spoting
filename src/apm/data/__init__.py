@@ -1,6 +1,8 @@
 """Dataset ingestion interfaces, loaders, registry, and utilities."""
 
 from apm.data.base import DatasetAdapter
+from apm.data.adapters.hc3_adapter import HC3Adapter, Hc3LoadCheckReport, Hc3SelectorValidationSummary, load_hc3_config
+from apm.data.adapters.hc3_materialize import MaterializedSplitOutput, materialize_hc3_samples
 from apm.data.custom_loader import load_custom_jsonl
 from apm.data.dataset_registry import DATASET_REGISTRY, DatasetRegistry, get_dataset_adapter, register_dataset_adapter
 from apm.data.hf_loader import load_dataset
@@ -10,7 +12,9 @@ from apm.data.storage import (
     build_metadata_payload,
     ensure_artifact_parent_dirs,
     resolve_dataset_artifact_paths,
+    write_normalized_parquet,
     write_metadata_json,
+    write_raw_snapshot_jsonl,
 )
 from apm.data.validation import ALLOWED_LABELS, REQUIRED_RECORD_FIELDS, validate_canonical_records
 
@@ -21,15 +25,23 @@ __all__ = [
     "DatasetAdapter",
     "DatasetArtifactPaths",
     "DatasetRegistry",
+    "HC3Adapter",
+    "Hc3LoadCheckReport",
+    "Hc3SelectorValidationSummary",
+    "MaterializedSplitOutput",
     "REQUIRED_RECORD_FIELDS",
     "build_metadata_payload",
     "ensure_artifact_parent_dirs",
     "get_dataset_adapter",
     "load_custom_jsonl",
     "load_dataset",
+    "load_hc3_config",
+    "materialize_hc3_samples",
     "register_dataset_adapter",
     "resolve_dataset_artifact_paths",
     "sample_records",
     "validate_canonical_records",
+    "write_normalized_parquet",
     "write_metadata_json",
+    "write_raw_snapshot_jsonl",
 ]

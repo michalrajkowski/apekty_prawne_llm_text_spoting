@@ -24,7 +24,8 @@ The objective is to measure how transformations and AI-content ratio influence d
 - `configs/detectors/`: detector configuration and runtime parameters.
 - `configs/transforms/`: text transformation configurations.
 - `configs/experiments/`: experiment matrices and run plans.
-- `src/apm/data/`: loaders and dataset registry (`hf_loader`, `custom_loader`).
+- `src/apm/data/`: shared ingestion infrastructure (registry, sampling, validation, storage, common loaders).
+- `src/apm/data/adapters/`: dataset-specific adapters and dataset-specific materialization scripts (for example HC3).
 - `src/apm/detectors/`: detector interface, registry, and per-detector adapters.
 - `src/apm/transforms/`: transform interface, registry, and operation implementations.
 - `src/apm/experiments/`: runner and matrix expansion/execution logic.

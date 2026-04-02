@@ -32,7 +32,79 @@ Active execution queue for the chunking research repository.
 
 ## Queue
 
-- (empty)
+### Task 004 - Kaggle LLM Detect AI Generated Text adapter integration
+
+Dataset Link:
+- https://www.kaggle.com/competitions/llm-detect-ai-generated-text/data
+
+Scope:
+- Analyze available files/columns and label semantics.
+- Define Kaggle dataset config in `configs/datasets/`.
+- Implement Kaggle loader adapter using universal interface.
+- Validate normalized output and label mapping.
+
+Acceptance Criteria:
+- Field audit and label interpretation are documented.
+- Adapter supports configured file/split selection.
+- Label mapping to canonical human/ai labels is explicit and tested.
+- Output matches canonical schema and persists to normalized storage.
+- Deterministic subset sampling works with seed.
+
+Decision Notes:
+- Treat source acquisition/auth separately from parsing logic.
+- Keep local file-path based input for reproducible offline reruns.
+
+Test Plan:
+- Add adapter tests for file parsing and label mapping.
+- Add deterministic sampling test for Kaggle adapter output IDs.
+- Add validation test against canonical schema.
+
+### Task 005 - GriD dataset adapter integration
+
+Dataset Link:
+- https://github.com/madlab-ucr/GriD?tab=readme-ov-file
+
+Scope:
+- Analyze repository data structure and annotation format.
+- Define GriD dataset config in `configs/datasets/`.
+- Implement GriD loader adapter using universal interface.
+- Validate normalized output and label mapping.
+
+Acceptance Criteria:
+- Field/source audit is documented.
+- Adapter supports configured split/source selection.
+- Human/AI mapping is explicit and tested.
+- Output matches canonical schema and persists to normalized storage.
+- Deterministic subset sampling works with seed.
+
+Decision Notes:
+- Minimize hardcoded paths; use config-driven file resolution.
+- Preserve provenance fields in `source_fields`.
+
+Test Plan:
+- Add adapter tests for source parsing and mapping correctness.
+- Add deterministic sampling test for GriD adapter output IDs.
+- Add validation test against canonical schema.
+
+### Task 006 - final integration and reproducibility hardening
+
+Scope:
+- Add missing glue code, docs, and sanity checks after 002-005.
+- Ensure all dataset adapters are runnable through one entry point.
+- Ensure reproducibility metadata is captured consistently.
+
+Acceptance Criteria:
+- One CLI/programmatic flow can run all configured dataset adapters.
+- Docs describe end-to-end flow: source -> normalized dataset -> experiments.
+- Reproducibility metadata (seed, source, config, revision/timestamp) is persisted.
+- Any remaining gaps from adapter tasks are closed.
+
+Decision Notes:
+- Keep this task strictly for integration hardening, not new dataset features.
+
+Test Plan:
+- Add integration smoke tests for registry-driven loading of all adapters.
+- Verify normalized artifacts and metadata files are emitted as expected.
 
 ## In Progress
 

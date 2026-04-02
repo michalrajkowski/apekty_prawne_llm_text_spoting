@@ -30,3 +30,18 @@
   - `configs/datasets/template.dataset.json`
 - Added `data/raw/.gitkeep` and documented artifact conventions in `README.md`.
 - Added targeted tests for sampling, validation, registry, and universal loader (`9 passed`).
+
+### Task 003 - HC3 dataset adapter integration
+- Implemented HC3 adapter using the Hugging Face `datasets` library:
+  - adapter module moved into dataset-specific adapters folder:
+    - `src/apm/data/adapters/hc3_adapter.py`
+  - source loading uses `datasets.load_dataset(...)` for each configured selector.
+- Kept HC3 integration config-driven:
+  - `configs/datasets/hc3.dataset.json`
+  - `configs/datasets/hc3_field_audit.md`
+- Implemented HC3 sample materialization runner:
+  - `src/apm/data/adapters/hc3_materialize.py`
+  - outputs deterministic sampled records (`sample_size=100`, `seed=42`) per selector.
+- Added HC3 adapter tests with mock dataset loader:
+  - `tests/test_hc3_adapter.py` (`12` total targeted tests passed with existing data tests).
+- Generated validation report and persisted sampled outputs for all configured HC3 selectors.

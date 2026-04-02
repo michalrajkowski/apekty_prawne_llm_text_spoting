@@ -1,0 +1,52 @@
+{
+  "dataset_id": "hc3",
+  "source_type": "huggingface",
+  "source_uri": "Hello-SimpleAI/HC3",
+  "default_selector": {
+    "config": "all",
+    "split": "train"
+  },
+  "sampling": {
+    "strategy": "random",
+    "seed": 42
+  },
+  "selectors": {
+    "all_train": {
+      "config": "all",
+      "split": "train"
+    },
+    "finance_train": {
+      "config": "finance",
+      "split": "train"
+    },
+    "medicine_train": {
+      "config": "medicine",
+      "split": "train"
+    },
+    "open_qa_train": {
+      "config": "open_qa",
+      "split": "train"
+    },
+    "reddit_eli5_train": {
+      "config": "reddit_eli5",
+      "split": "train"
+    },
+    "wiki_csai_train": {
+      "config": "wiki_csai",
+      "split": "train"
+    }
+  },
+  "mapping": {
+    "id_field": "id",
+    "prompt_field": "question",
+    "human_answers_field": "human_answers",
+    "ai_answers_field": "chatgpt_answers",
+    "optional_source_field": "source",
+    "explode_answer_lists": true,
+    "canonical_label_mapping": {
+      "human_answers": "human",
+      "chatgpt_answers": "ai"
+    },
+    "sample_id_pattern": "{config}:{split}:{id}:{label}:{answer_index}"
+  }
+}

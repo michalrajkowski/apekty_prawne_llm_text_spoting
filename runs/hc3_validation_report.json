@@ -1,0 +1,55 @@
+{
+  "dataset_id": "hc3",
+  "source_uri": "Hello-SimpleAI/HC3",
+  "requested_rows_per_selector": 100,
+  "summaries": [
+    {
+      "selector": "all_train",
+      "dataset_rows": 24322,
+      "loaded_rows": 100,
+      "missing_required_rows": 0,
+      "empty_human_answers_rows": 0,
+      "empty_ai_answers_rows": 0
+    },
+    {
+      "selector": "finance_train",
+      "dataset_rows": 3933,
+      "loaded_rows": 100,
+      "missing_required_rows": 0,
+      "empty_human_answers_rows": 0,
+      "empty_ai_answers_rows": 0
+    },
+    {
+      "selector": "medicine_train",
+      "dataset_rows": 1248,
+      "loaded_rows": 100,
+      "missing_required_rows": 0,
+      "empty_human_answers_rows": 0,
+      "empty_ai_answers_rows": 0
+    },
+    {
+      "selector": "open_qa_train",
+      "dataset_rows": 1187,
+      "loaded_rows": 100,
+      "missing_required_rows": 0,
+      "empty_human_answers_rows": 0,
+      "empty_ai_answers_rows": 0
+    },
+    {
+      "selector": "reddit_eli5_train",
+      "dataset_rows": 17112,
+      "loaded_rows": 100,
+      "missing_required_rows": 0,
+      "empty_human_answers_rows": 0,
+      "empty_ai_answers_rows": 0
+    },
+    {
+      "selector": "wiki_csai_train",
+      "dataset_rows": 842,
+      "loaded_rows": 100,
+      "missing_required_rows": 0,
+      "empty_human_answers_rows": 0,
+      "empty_ai_answers_rows": 0
+    }
+  ]
+}

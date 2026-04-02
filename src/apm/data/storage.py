@@ -1,4 +1,4 @@
-"""Path and metadata helpers for dataset storage artifacts."""
+"""Path and persistence helpers for dataset storage artifacts."""
 
 from __future__ import annotations
 
@@ -8,6 +8,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Mapping
 
+import pandas as pd
+
+from apm.types import CanonicalDatasetRecord
 from apm.types import SamplingStrategy
 
 
@@ -81,3 +84,46 @@ def write_metadata_json(metadata_path: Path, metadata: Mapping[str, Any]) -> Non
     metadata_path.parent.mkdir(parents=True, exist_ok=True)
     serialized = json.dumps(dict(metadata), indent=2, ensure_ascii=False, sort_keys=True) + "\n"
     metadata_path.write_text(serialized, encoding="utf-8")
+
+
+def write_raw_snapshot_jsonl(raw_snapshot_dir: Path, records: list[CanonicalDatasetRecord]) -> Path:
+    """Persist canonical records as JSONL raw snapshot for auditability."""
+
+    raw_snapshot_dir.mkdir(parents=True, exist_ok=True)
+    snapshot_path = raw_snapshot_dir / "sampled_records.jsonl"
+
+    lines: list[str] = []
+    for record in records:
+        payload = {
+            "dataset_id": record.dataset_id,
+            "split": record.split,
+            "sample_id": record.sample_id,
+            "text": record.text,
+            "label": record.label,
+            "source_fields": record.source_fields,
+        }
+        lines.append(json.dumps(payload, ensure_ascii=False))
+    snapshot_path.write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
+    return snapshot_path
+
+
+def write_normalized_parquet(parquet_path: Path, records: list[CanonicalDatasetRecord]) -> Path:
+    """Persist canonical records into normalized Parquet format."""
+
+    parquet_path.parent.mkdir(parents=True, exist_ok=True)
+
+    rows: list[dict[str, Any]] = []
+    for record in records:
+        rows.append(
+            {
+                "dataset_id": record.dataset_id,
+                "split": record.split,
+                "sample_id": record.sample_id,
+                "text": record.text,
+                "label": record.label,
+                "source_fields": json.dumps(record.source_fields, ensure_ascii=False, sort_keys=True),
+            }
+        )
+    dataframe = pd.DataFrame(rows)
+    dataframe.to_parquet(parquet_path, index=False)
+    return parquet_path

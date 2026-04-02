@@ -25,6 +25,23 @@ Normalized artifacts convention:
 - normalized split outputs: `data/interim/datasets/<dataset_id>/<split>.parquet`
 - metadata sidecar: `data/interim/datasets/<dataset_id>/<split>.metadata.json`
 
+## HC3 Materialization
+
+HC3 adapter configuration and field audit:
+
+- `configs/datasets/hc3.dataset.json`
+- `configs/datasets/hc3_field_audit.md`
+
+Materialize sampled HC3 outputs (default: `100` per selector, deterministic `seed=42`):
+
+```bash
+PYTHONPATH=src python -m apm.data.adapters.hc3_materialize \
+  --project-root . \
+  --config configs/datasets/hc3.dataset.json \
+  --sample-size 100 \
+  --seed 42
+```
+
 ## Prompt History Viewer
 
 Task history viewer is isolated under `prompt_history/` and generates a static HTML chat view from `prompt_history/PROMPTS_HISTORY.md`.
