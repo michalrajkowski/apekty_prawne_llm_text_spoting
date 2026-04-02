@@ -4,21 +4,38 @@ The repository's main goal is to compare GPT/AI text detectors on benchmark data
 
 ## Prompt History
 
-- After each user message, archive it in `PROMPTS_HISTORY.md`.
-- Add the date of sending to the archived user message.
-- Before generating a new response, first add a very short summary of the agent's previous response, so entries look like a dialog.
-- Assign exactly one primary intention tag for each user message.
-- Optionally add secondary/additional tags when needed.
-- Use only tags from this list:
-  - `dialog` — social or conversational interaction, where the main goal is rapport, tone, pacing, or meta-conversation rather than task completion.
-  - `question` — asks for information, explanation, clarification, or a direct answer.
-  - `code_review` — asks the agent to inspect code, confirm correctness, critique quality, or justify whether something is good or safe.
-  - `execution` — tells the agent to do something: run, generate, modify, create, apply, or perform an action.
-  - `retrieval` — asks the agent to find, fetch, search, or summarize information from files, repos, web, or other sources.
-  - `planning` — asks for a plan, roadmap, step sequence, rollout, decision tree, or decomposition of work.
-  - `debugging` — asks for root-cause analysis, error diagnosis, fixes, or validation of a failing behavior.
-  - `creative` — asks for novel content such as drafts, ideas, names, stories, copy, or alternative formulations.
-  - `transformation` — asks the agent to transform provided input into a required form, such as summarize, translate, extract, classify, or format into JSON/schema.
+1. After each user message, archive it in `prompt_history/PROMPTS_HISTORY.md`.
+2. Every archived block must include date + time only (no timezone suffix), e.g. `YYYY-MM-DD HH:MM:SS`.
+3. Assign exactly one primary intention tag for each user message (optionally add secondary tags).
+4. Use only tags from this list: `dialog`, `question`, `code_review`, `execution`, `retrieval`, `planning`, `debugging`, `creative`, `transformation`.
+
+### Non-Negotiable Prompt History Rules
+
+1. Copied user messages must be copied exactly as written.
+2. Never summarize user messages.
+3. Never correct user typos/grammar in archived user messages.
+4. Only summarize agent messages.
+5. Prompt history must look like a chat and use the exact structure below.
+
+### Required Format
+
+````md
+# Prompt History
+
+<date + timestamp>
+USER:
+```text
+<user message copied exactly>
+```
+TAGS: [<primary_tag>, <optional_secondary_tag>]
+---
+<date + timestamp>
+AGENT:
+```text
+<summarized message>
+```
+---
+````
 
 ## Development Workflow
 
