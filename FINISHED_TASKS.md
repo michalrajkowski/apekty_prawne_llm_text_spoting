@@ -12,3 +12,21 @@
 - Added Python runner that installs `prompt_history/requirements.txt` and generates:
   - `prompt_history/runs/prompt_history.html`
 - Added automated tests for parser behavior, newline preservation, nested fence handling, and deterministic tag colors.
+
+### Task 002 - universal dataset ingestion foundation
+- Implemented typed canonical ingestion models in `src/apm/types.py`:
+  - `dataset_id`, `split`, `sample_id`, `text`, `label`, `source_fields`
+  - load request/result models with default `sampling_strategy=random` and `seed=42`.
+- Added universal ingestion infrastructure in `src/apm/data/`:
+  - adapter protocol (`base.py`),
+  - registry (`dataset_registry.py`),
+  - shared loader (`hf_loader.py`),
+  - deterministic sampling utility (`sampling.py`),
+  - canonical validation helpers (`validation.py`),
+  - storage path and metadata helpers (`storage.py`),
+  - local JSONL custom loader (`custom_loader.py`).
+- Added dataset config foundation docs:
+  - `configs/datasets/schema.md`
+  - `configs/datasets/template.dataset.json`
+- Added `data/raw/.gitkeep` and documented artifact conventions in `README.md`.
+- Added targeted tests for sampling, validation, registry, and universal loader (`9 passed`).

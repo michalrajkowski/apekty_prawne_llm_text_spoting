@@ -1,0 +1,21 @@
+{
+  "dataset_id": "example_dataset",
+  "source_type": "huggingface",
+  "source_uri": "namespace/dataset_name",
+  "default_split": "train",
+  "sampling": {
+    "strategy": "random",
+    "seed": 42
+  },
+  "splits": {
+    "train": {
+      "selector": "train",
+      "text_field": "text",
+      "label_field": "label",
+      "label_mapping": {
+        "human": "human",
+        "ai": "ai"
+      }
+    }
+  }
+}
