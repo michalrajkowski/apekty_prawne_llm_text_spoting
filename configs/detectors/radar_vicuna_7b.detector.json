@@ -1,0 +1,10 @@
+{
+  "detector_id": "radar_vicuna_7b",
+  "model_id": "TrustSafeAI/RADAR-Vicuna-7B",
+  "device": "cuda",
+  "max_length": 512,
+  "ai_label_index": 1,
+  "local_files_only": false,
+  "trust_remote_code": false,
+  "cache_dir": ".cache/huggingface"
+}
