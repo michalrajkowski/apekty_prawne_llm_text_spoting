@@ -35,6 +35,101 @@ For any new dataset integration task, follow
 
 ## Queue
 
+### Task 017 - adapter fidelity contract v2 (native outputs + canonical AI direction)
+
+Scope:
+- Update the detector base contract to support model-intent fidelity instead of forcing everything into one probability-like float.
+- Introduce structured detector output that keeps native detector output separate from optional canonicalized score(s).
+- Add required semantics metadata fields for each detector output:
+  - `score_kind` (for example: `binary_probability`, `curvature_statistic`, `token_rank_signal`, `multiclass_logits`),
+  - `score_range` (for example: `(0,1)`, `unbounded`, `depends`),
+  - optional canonical score field used for cross-detector comparison.
+- Enforce project-wide rule: canonical comparison score must always follow `higher = more AI-like`.
+- Update detector integration docs to make this contract mandatory for all newly added detectors.
+
+Acceptance Criteria:
+- Base detector abstractions/types are updated to represent native outputs + semantics metadata.
+- Docs (`docs/INTEGRATING_NEW_DETECTOR.md`) explicitly require preserving native detector output semantics.
+- Canonical comparison score rule (`higher = AI`) is documented and validated in code paths that expose canonical scores.
+- No adapter is forced to pretend its native output is a calibrated Human/AI probability.
+
+Decision Notes:
+- Native outputs are the source of truth for scientific fidelity.
+- Canonical AI-direction score is a secondary layer for cross-detector comparability, not a replacement for native output.
+
+Test Plan:
+- Add unit tests for new output types/metadata validation and canonical direction enforcement.
+- Run targeted detector-base tests and type checks on touched files.
+
+### Task 018 - migrate existing detector adapters to fidelity contract v2
+
+Scope:
+- Refactor already integrated detectors to comply with Task 017 output contract.
+- Remove forced probability-style mappings where they are not native detector outputs.
+- Preserve each detector’s native scoring behavior and attach required semantics metadata.
+- Where needed, add canonical comparison score adapters with enforced `higher = AI` direction.
+- Correct known direction/index mapping mistakes (for example, RADAR label index mismatch).
+
+Acceptance Criteria:
+- Existing adapters return contract-compliant structured outputs with semantics metadata.
+- Native score behavior is preserved per detector intended use.
+- Canonical `higher = AI` score is present only as derived optional field where applicable.
+- Detector smoke scripts and README examples are updated for new output structure.
+
+Decision Notes:
+- Migration is separate from contract definition to keep the change reviewable and lower risk.
+- Direction fixes are part of migration because wrong label orientation invalidates downstream experiments.
+
+Test Plan:
+- Update existing detector adapter tests for new output schema.
+- Run detector-special targeted tests for all migrated adapters.
+- Run smoke checks for at least one representative input per migrated detector.
+
+### Task 019 - universal real-data direction/index validation test for new detectors
+
+Scope:
+- Add a reusable detector validation test utility that runs on real dataset samples:
+  - select 10 human and 10 AI texts from configured dataset materialization outputs,
+  - score with detector under test,
+  - compare average canonical AI-direction score between classes.
+- If `mean(ai) <= mean(human)`, test must fail with clear diagnostic indicating likely label/direction/index configuration issue.
+- Require every newly implemented detector task to include this validation test directly in its detector-special test module.
+
+Acceptance Criteria:
+- One universal test helper exists and is reusable across detector integrations.
+- New-detector test template includes mandatory real-data direction check.
+- Failing output explicitly points to probable direction/index mismatch (for example `ai_label_index` inversion).
+- Test documentation explains prerequisites (materialized dataset availability, required markers).
+
+Decision Notes:
+- This is an automated guardrail against silent orientation bugs like RADAR index inversion.
+- Validation is statistical sanity check, not full benchmark replacement.
+
+Test Plan:
+- Add tests for helper behavior (pass/fail diagnostics) with controlled synthetic scores.
+- Run at least one real detector-special validation on actual materialized data.
+
+### Task 020 - remove SynthID watermarking detector integration
+
+Scope:
+- Remove watermarking-focused SynthID detector integration from repository runtime surface.
+- Remove associated adapter/config/smoke/tests and disable any workflow paths depending on SynthID detector.
+- Remove SynthID detector references from detector lists/docs where it is currently presented as a text detector option.
+- Keep repository history intact (no destructive git rewrite).
+
+Acceptance Criteria:
+- `synthid_text` adapter is no longer runnable through detector registry/config workflows.
+- No active detector config points to SynthID.
+- Detector docs/model lists no longer present SynthID as supported experiment detector.
+- Test suite no longer expects SynthID integration.
+
+Decision Notes:
+- Watermark-presence detection is out of scope for current AI-vs-human detector comparison goals.
+
+Test Plan:
+- Run targeted tests for detector registry/config loading after removal.
+- Run smoke path for remaining detectors to confirm no broken imports/registration side effects.
+
 ### Task 012 - detector abstraction layer and unified interface
 
 Scope:
@@ -132,7 +227,7 @@ Test Plan:
 ### Task 014 - detector integration: Binoculars
 
 Scope:
-- Integrate Binoculars under `src/apm/detectors/adapters/` as a detector that outputs class-probability style scores.
+- Integrate Binoculars under `src/apm/detectors/adapters/` with native detector output preserved per fidelity contract (Task 017).
 - Add config, smoke runner, and detector-special tests.
 - Ensure integration is fully compatible with current detector spec in `docs/INTEGRATING_NEW_DETECTOR.md`.
 
@@ -140,10 +235,10 @@ Acceptance Criteria:
 - Adapter implements required interface (`initialize`, `predict_single`, `predict_batch`, `delete`) per `docs/INTEGRATING_NEW_DETECTOR.md`.
 - Config exists in `configs/detectors/` and smoke runner exists in `src/apm/detectors/adapters/`.
 - Detector-special tests exist in `tests/detectors/` and validate output shape/type, single-vs-batch consistency, and cleanup path.
-- Returned outputs are usable as detector confidence/probability scores.
+- Adapter output follows fidelity contract: native score semantics metadata + optional canonical `higher = AI` score.
 
 Decision Notes:
-- Keep implementation focused on inference path and reproducible runtime configuration.
+- Keep implementation focused on inference path and reproducible runtime configuration without forcing probability mapping.
 
 Test Plan:
 - Add `tests/detectors/test_binoculars.py` with marker `detector_special`.
@@ -152,7 +247,7 @@ Test Plan:
 ### Task 015 - detector integration: Fast-DetectGPT
 
 Scope:
-- Integrate Fast-DetectGPT under `src/apm/detectors/adapters/` as a detector returning class/confidence scores.
+- Integrate Fast-DetectGPT under `src/apm/detectors/adapters/` with native detector output preserved per fidelity contract (Task 017).
 - Add config, smoke runner, and detector-special tests.
 - Ensure integration is fully compatible with current detector spec in `docs/INTEGRATING_NEW_DETECTOR.md`.
 
@@ -160,10 +255,10 @@ Acceptance Criteria:
 - Adapter implements required interface (`initialize`, `predict_single`, `predict_batch`, `delete`) per `docs/INTEGRATING_NEW_DETECTOR.md`.
 - Config exists in `configs/detectors/` and smoke runner exists in `src/apm/detectors/adapters/`.
 - Detector-special tests validate output shape/type, single-vs-batch consistency, and cleanup path.
-- Returned outputs are usable as detector confidence/probability scores.
+- Adapter output follows fidelity contract: native score semantics metadata + optional canonical `higher = AI` score.
 
 Decision Notes:
-- Prioritize stable adapter behavior and deterministic config-driven execution.
+- Prioritize stable adapter behavior and deterministic config-driven execution without reinterpreting native outputs as probabilities.
 
 Test Plan:
 - Add `tests/detectors/test_fast_detectgpt.py` with marker `detector_special`.
@@ -172,7 +267,7 @@ Test Plan:
 ### Task 016 - detector integration: Ghostbuster
 
 Scope:
-- Integrate Ghostbuster under `src/apm/detectors/adapters/` with output mapped to class/confidence score format.
+- Integrate Ghostbuster under `src/apm/detectors/adapters/` with native detector output preserved per fidelity contract (Task 017).
 - Add config, smoke runner, and detector-special tests.
 - Ensure integration is fully compatible with current detector spec in `docs/INTEGRATING_NEW_DETECTOR.md`.
 
@@ -180,7 +275,7 @@ Acceptance Criteria:
 - Adapter implements required interface (`initialize`, `predict_single`, `predict_batch`, `delete`) per `docs/INTEGRATING_NEW_DETECTOR.md`.
 - Config exists in `configs/detectors/` and smoke runner exists in `src/apm/detectors/adapters/`.
 - Detector-special tests validate output shape/type, single-vs-batch consistency, and cleanup path.
-- Returned outputs are usable as detector confidence/probability scores.
+- Adapter output follows fidelity contract: native score semantics metadata + optional canonical `higher = AI` score.
 
 Decision Notes:
 - If upstream requires API-backed calls, keep adapter contract unchanged and surface required credentials/config explicitly.

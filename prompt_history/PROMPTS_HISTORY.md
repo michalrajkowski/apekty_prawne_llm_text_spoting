@@ -1733,3 +1733,117 @@ TAGS: [execution]
 AGENT:
 
 ---
+2026-04-03 14:28:27
+USER:
+```text
+verify which detectors have not been implemented yet or does not even have tasks. Their weight does not matter. 
+
+look for models in here but they have to be ai text detectors that output class / probabilities
+
+text_detection_models.txt
+```
+TAGS: [retrieval]
+---
+2026-04-03 14:28:28
+AGENT:
+```text
+Cross-checked detectors listed in `text_detection_models.txt` against implemented adapters/configs and task files, then identified missing implementations and missing task coverage.
+```
+---
+2026-04-03 14:35:20
+USER:
+```text
+create tasks for those three:
+
+Binoculars
+Fast-DetectGPT
+Ghostbuster
+
+mention inside them that the models should be compatible with the current specs (docs/INTEGRATING_NEW_DETECTOR.md)
+```
+TAGS: [execution]
+---
+2026-04-03 14:35:21
+AGENT:
+```text
+Added three new queue tasks in TASKS.md for Binoculars, Fast-DetectGPT, and Ghostbuster, each explicitly requiring compatibility with the detector integration spec in `docs/INTEGRATING_NEW_DETECTOR.md`.
+```
+---
+2026-04-03 14:42:51
+USER:
+```text
+Check each detector repo and their outputs. 
+
+Verify if the models high probabilities means the text is written by bot and low that is written by human.
+
+Verify if each detector outputs probabilities in range (0,1) or uses different score ranges
+```
+TAGS: [retrieval, question]
+---
+2026-04-03 14:42:51
+AGENT:
+```text
+Audited each implemented detector against local adapter code, external detector repositories, and available scoring artifacts; verified score direction and numeric ranges, identified which outputs are true probabilities versus heuristic scores, and flagged a RADAR label-index mismatch in current configuration.
+```
+---
+2026-04-03 14:53:54
+USER:
+```text
+Why the detectgpt_light uses some perturbation to detect ai or not ai generated text? 
+
+I do not want my adapters to modify the intended use of the models. If some model is not fit to return probability of text as Human/AI, then it should return it's own output. 
+
+Also why some models use this formula?
+
+1/(1+exp(loss))
+```
+TAGS: [question, debugging]
+---
+2026-04-03 14:53:54
+AGENT:
+```text
+Explained that perturbation is core to DetectGPT’s original method (curvature via perturbed likelihood comparisons), clarified that current adapters map diverse detector outputs into a pseudo-probability scale for convenience, and outlined why `1/(1+exp(loss))` is a monotonic normalization of loss rather than an official model output.
+```
+---
+2026-04-03 14:59:03
+USER:
+```text
+I want to perform experiments using different ai text detecting models and check how different techniques of "humanizing" ai text affect the models score. Let's brainstorm for a bit about two things:
+- what to do with the adapters situation to be faithfull to the model intended use
+- how to perform the mass experimesnts on the technical level / what should the pipeline look like and what should it do
+```
+TAGS: [planning, dialog]
+---
+2026-04-03 14:59:03
+AGENT:
+```text
+Proposed a decision-oriented brainstorming plan covering two areas: faithful adapter semantics (preserving native detector outputs and meaning) and a scalable, reproducible mass-experiment pipeline for humanization-technique evaluation across detectors.
+```
+---
+2026-04-03 15:06:07
+USER:
+```text
+let's write task for 1) first.
+
+One task will be to create universal unit test for the Add adapter validation tests that catch direction/index mistakes (like RADAR class index). that should verift the model on real data. It should take 10 real ai and 10 real human tekst from some dataset and check if average score for ai is higher than for human. If not then it suggest some problems. This unit test should be run for newly implemented models (directly for new model).
+
+delete the watermarking model from our repositroy. (make this as task). We do not need it.
+
+Task for this: (that it will be rule for enforing new detectors + modify the base adapter. Then the next task to modify already present adapters to fit this rueles.
+") Adapter Fidelity (Model-Intent First)
+
+Stop forcing every detector into “AI probability”.
+Make adapters return native outputs + explicit semantics metadata.
+Keep derived/normalized scores optional and clearly separate from native outputs.
+For each detector, store:
+score_kind (e.g. binary_probability, curvature_statistic, watermark_probability, token_rank_signal, multiclass_logits)
+range (e.g. (0,1), unbounded, depends)" But about this: "higher_means (e.g. more_ai_likely, more_human_likely, watermark_present)" i want always higher = ai enforced.
+```
+TAGS: [planning]
+---
+2026-04-03 15:06:07
+AGENT:
+```text
+Prepared to add concrete queue tasks for adapter-fidelity contract enforcement, existing-adapter migration, universal real-data direction validation for new detectors, and removal of watermarking model integration; aligned task wording to the rule that canonical higher scores must always mean more AI-like.
+```
+---
