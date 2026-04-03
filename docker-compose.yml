@@ -1,0 +1,23 @@
+services:
+  apm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: "3.13.2"
+    image: apm-research:py3.13.2-gpu
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    gpus: all
+    environment:
+      PYTHONPATH: /workspace/src
+      HF_HOME: /workspace/.cache/huggingface
+      HUGGINGFACE_HUB_CACHE: /workspace/.cache/huggingface/hub
+      TRANSFORMERS_CACHE: /workspace/.cache/huggingface/hub
+      KAGGLE_CONFIG_DIR: /workspace/.kaggle
+      PIP_CACHE_DIR: /workspace/.cache/pip
+      MPLCONFIGDIR: /workspace/.cache/matplotlib
+    volumes:
+      - ./:/workspace
+    command: bash

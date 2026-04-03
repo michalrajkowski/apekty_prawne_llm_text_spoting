@@ -1,3 +1,24 @@
+## 2026-04-03
+
+### Task 013 - reproducible GPU Docker runtime with pinned dependencies
+- Added Dockerized GPU-ready runtime pinned to Python `3.13.2`:
+  - `Dockerfile`
+  - `docker-compose.yml` (`gpus: all`)
+  - `.dockerignore`
+  - `Makefile` docker wrappers for build/shell/materialization/scoring pipeline.
+- Switched dependencies to exact versions:
+  - pinned direct dependencies in `requirements.txt`
+  - added transitive lock snapshot in `requirements.lock.txt` (used by Docker build).
+- Enforced mount-first workflow for iteration:
+  - compose bind-mounts repository root at `/workspace`,
+  - runtime/caches stay on host-mounted paths (`data/`, `runs/`, `.cache/`, `.kaggle/`).
+- Updated README with Docker-first bootstrap and run commands:
+  - image build/shell,
+  - dataset initialization via `apm.data.materialize_all`,
+  - scoring + summarize + plotting commands.
+- Added HC3 loader compatibility fix for modern `datasets` versions:
+  - `src/apm/data/adapters/hc3_adapter.py` now loads HC3 selector JSONL files via `huggingface_hub` + `load_dataset("json", ...)` instead of dataset-script loading (`HC3.py`), preventing `Dataset scripts are no longer supported` runtime failure.
+
 ## 2026-04-02
 
 ### Task 001 - prompt history viewer

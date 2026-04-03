@@ -1584,3 +1584,152 @@ AGENT:
 Staged detector abstraction/task-history updates relevant to the current work and created a commit with a single message.
 ```
 ---
+2026-04-03 13:17:15
+USER:
+```text
+I accidentaly reset hard head^^. It does not matter. If it is possible to restore my github to the newest state do it to rollback this reset
+```
+TAGS: [execution]
+---
+2026-04-03 13:17:16
+AGENT:
+```text
+Recovered branch state from reflog by resetting `main` to commit `6b31a7d` (latest pre-reset local state) and verified commit history restoration; attempted to sync GitHub with `git push origin main`, but push failed due missing SSH key authentication in this environment.
+```
+---
+2026-04-03 13:21:38
+USER:
+```text
+now modify the commit history to unadd from the scratch files the json with results as text. Then modify those experiments files so it never adds the text of the dataset sample to json
+```
+TAGS: [execution]
+---
+2026-04-03 13:21:39
+AGENT:
+```text
+Rewrote the top branch history to replace scratch/results commits with clean versions that do not track `scratch/detector_scoring/results/*`, updated scratch runner serialization to never persist sample text in JSON metadata, and kept requirements as a separate rebuilt commit.
+```
+---
+2026-04-03 13:24:00
+USER:
+```text
+read the readme/docs. 
+
+How to corretly initialize the repo on remote machine to:
+- have all datasets needed
+- be able to run the experiment (+ command to run them)
+```
+TAGS: [retrieval]
+---
+2026-04-03 13:24:00
+AGENT:
+```text
+Read README/docs and provided a remote-machine bootstrap sequence covering submodules, Python environment setup, dataset materialization (including Kaggle credential prerequisites), and experiment execution commands for detector scoring, summary, and plotting.
+```
+---
+2026-04-03 13:34:17
+USER:
+```text
+I prefere the dockerization aproach + exact libraries versions. 
+
+Let's create this docker on the exact python version as i have localy + the gpu support. 
+
+create a task for this and i will review it and then you will proceed with implementation
+```
+TAGS: [planning]
+---
+2026-04-03 13:34:18
+AGENT:
+```text
+Verified local project Python version (`3.13.2`) and added a new queue item in TASKS.md (Task 013) defining scope, acceptance criteria, decision notes, and test plan for reproducible GPU Docker runtime with pinned dependencies and mounted data/runs/caches.
+```
+---
+2026-04-03 13:35:44
+USER:
+```text
+The docker should mount as much as possible so i do not need to rebuild it each time i do small modification to the config etc. 
+```
+TAGS: [planning]
+---
+2026-04-03 13:35:45
+AGENT:
+```text
+Updated Task 013 to require maximal bind mounts (repo/code/config/data/runs/caches), explicit no-rebuild workflow for day-to-day edits, and rebuilds only for base/dependency layer changes.
+```
+---
+2026-04-03 13:44:34
+USER:
+```text
+While testing this docker container verify the cuda works and it is possible to use gpu from inside
+```
+TAGS: [execution]
+---
+2026-04-03 13:44:35
+AGENT:
+```text
+Ran an in-container CUDA smoke test (`torch.cuda.is_available`, device query, and CUDA matrix multiplication). Verification passed: CUDA is available, GPU is visible, and real GPU computation completed successfully.
+```
+---
+2026-04-03 13:46:05
+USER:
+```text
+why docker compose adds so much cache? 
+
+
+```
+TAGS: [question]
+---
+2026-04-03 13:46:06
+AGENT:
+```text
+Explained Docker disk growth sources (image/layer cache, CUDA/Torch wheel size, Hugging Face and datasets caches on bind mounts, and runtime container/network artifacts) and provided targeted cleanup and size-control commands.
+```
+---
+2026-04-03 13:46:31
+USER:
+```text
+why docker compose adds so much cache? 
+
+    environment:
+      PYTHONPATH: /workspace/src
+      HF_HOME: /workspace/.cache/huggingface
+      HUGGINGFACE_HUB_CACHE: /workspace/.cache/huggingface/hub
+      TRANSFORMERS_CACHE: /workspace/.cache/huggingface/hub
+      KAGGLE_CONFIG_DIR: /workspace/.kaggle
+      PIP_CACHE_DIR: /workspace/.cache/pip
+      MPLCONFIGDIR: /workspace/.cache/matplotlib
+    volumes:
+      - ./:/workspace
+```
+TAGS: [question]
+---
+2026-04-03 13:46:32
+AGENT:
+```text
+Explained that large on-disk cache growth is expected because model/dataset artifacts are intentionally persisted on the bind-mounted host path; identified which cache environment variables are necessary versus redundant and provided a leaner configuration strategy.
+```
+---
+2026-04-03 13:49:02
+USER:
+```text
+add all necesery files + the PROMPT_HISTORY.md, then propose short commit message.
+
+Before that write tiny instruction Docker-setup.md to docs which will show the commands to initialize repo with docker + run the experimesnts
+```
+TAGS: [execution]
+---
+2026-04-03 13:49:03
+AGENT:
+```text
+Added `docs/Docker-setup.md` with minimal Docker bootstrap and experiment commands, staged all Task 013 implementation files together with `prompt_history/PROMPTS_HISTORY.md`, and prepared a short commit message proposal.
+```
+---
+2026-04-03 13:53:08
+USER:
+
+TAGS: [execution]
+---
+2026-04-03 13:53:08
+AGENT:
+
+---

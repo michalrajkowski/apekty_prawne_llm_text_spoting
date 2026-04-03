@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping, Protocol, Sequence, cast
 
 from datasets import Dataset, load_dataset
+from huggingface_hub import hf_hub_download
 
 from apm.types import CanonicalDatasetRecord, DatasetLabel
 
@@ -85,6 +86,18 @@ class Hc3LoadCheckReport:
 
 def _load_source_dataset(source_uri: str, config: str, split: str) -> SourceDatasetLike:
     """Load one HF dataset split with the official datasets library."""
+
+    if source_uri == "Hello-SimpleAI/HC3":
+        jsonl_filename = f"{config}.jsonl"
+        downloaded_jsonl = hf_hub_download(
+            repo_id=source_uri,
+            repo_type="dataset",
+            filename=jsonl_filename,
+        )
+        loaded = load_dataset(path="json", data_files={split: downloaded_jsonl}, split=split)
+        if not isinstance(loaded, Dataset):
+            raise ValueError("Expected `datasets.Dataset` when loading HC3 jsonl split.")
+        return cast(SourceDatasetLike, loaded)
 
     loaded = load_dataset(path=source_uri, name=config, split=split)
     if not isinstance(loaded, Dataset):
@@ -258,10 +271,25 @@ class HC3Adapter:
         """Convert one HC3 source row to canonical records."""
 
         mapping = self._config.mapping
-        row_id_value = row_payload.get(mapping.id_field)
+        row_id_raw = row_payload.get(mapping.id_field)
+        if row_id_raw is None:
+            row_id_raw = row_payload.get("index")
         prompt_value = row_payload.get(mapping.prompt_field)
-        if not isinstance(row_id_value, str) or not row_id_value.strip():
-            raise ValueError("HC3 row id must be a non-empty string.")
+        if isinstance(row_id_raw, str):
+            row_id_value = row_id_raw.strip()
+        elif isinstance(row_id_raw, int):
+            row_id_value = str(row_id_raw)
+        elif isinstance(row_id_raw, float):
+            if row_id_raw.is_integer():
+                row_id_value = str(int(row_id_raw))
+            else:
+                row_id_value = str(row_id_raw)
+        elif row_id_raw is None:
+            row_id_value = str(row_index)
+        else:
+            raise ValueError("HC3 row id must be a non-empty string or numeric value.")
+        if not row_id_value:
+            row_id_value = str(row_index)
         if not isinstance(prompt_value, str):
             raise ValueError("HC3 question field must be a string.")
 

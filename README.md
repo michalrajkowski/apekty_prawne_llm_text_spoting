@@ -20,6 +20,86 @@ If you already cloned without `--recurse-submodules`, run:
 ./scripts/init_submodules.sh
 ```
 
+## Reproducible Docker Runtime (GPU)
+
+Recommended runtime is Docker with GPU support and pinned dependencies.
+
+What is pinned:
+- Python image: `3.13.2`
+- direct dependencies: `requirements.txt` (exact versions)
+- full lock: `requirements.lock.txt` (transitive freeze used by Docker build)
+
+Day-to-day code/config edits do not require rebuilding because the whole repository is bind-mounted into the container.
+Rebuild only when `Dockerfile`/`requirements*.txt` change.
+
+Build and open shell:
+
+```bash
+docker compose build apm
+docker compose run --rm apm
+```
+
+Or via `make` wrappers:
+
+```bash
+make docker-build
+make docker-shell
+```
+
+Inside container, `PYTHONPATH=/workspace/src` is set automatically.
+
+### Kaggle Credentials in Docker
+
+Create local credential file (gitignored) and keep it in repository root under `.kaggle/`:
+
+```bash
+mkdir -p .kaggle
+cp configs/credentials/kaggle.example.json .kaggle/kaggle.json
+chmod 600 .kaggle/kaggle.json
+```
+
+### Initialize All Datasets (Docker)
+
+```bash
+docker compose run --rm apm \
+  python -m apm.data.materialize_all \
+  --project-root . \
+  --config-dir configs/datasets \
+  --sample-size 100 \
+  --seed 42
+```
+
+or:
+
+```bash
+make docker-materialize-all
+```
+
+### Run Detector Scoring Experiment (Docker)
+
+```bash
+docker compose run --rm apm \
+  python scratch/detector_scoring/run_detector_scores.py \
+  --project-root . \
+  --examples-per-label 3
+
+docker compose run --rm apm \
+  python scratch/detector_scoring/summarize_scores.py \
+  --project-root .
+
+docker compose run --rm apm \
+  python scratch/detector_scoring/plot_detector_scores.py \
+  --project-root .
+```
+
+or:
+
+```bash
+make docker-score
+make docker-summarize
+make docker-plot
+```
+
 ## Dataset Ingestion Foundation
 
 Universal dataset ingestion foundations are implemented in `src/apm/data/`:
