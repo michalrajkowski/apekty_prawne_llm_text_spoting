@@ -4,6 +4,22 @@
 
 Current repository structure and architecture decisions are documented in `ARCHITECTURE.md`.
 
+## Submodule Initialization
+
+This repository vendors detector implementations as Git submodules under `external/detectors/`.
+
+Clone with submodules initialized:
+
+```bash
+git clone --recurse-submodules <repo-url>
+```
+
+If you already cloned without `--recurse-submodules`, run:
+
+```bash
+./scripts/init_submodules.sh
+```
+
 ## Dataset Ingestion Foundation
 
 Universal dataset ingestion foundations are implemented in `src/apm/data/`:

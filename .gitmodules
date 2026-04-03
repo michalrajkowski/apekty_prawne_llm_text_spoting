@@ -1,0 +1,12 @@
+[submodule "external/detectors/gltr"]
+	path = external/detectors/gltr
+	url = https://github.com/HendrikStrobelt/detecting-fake-text.git
+[submodule "external/detectors/detectgpt"]
+	path = external/detectors/detectgpt
+	url = https://github.com/eric-mitchell/detect-gpt.git
+[submodule "external/detectors/seqxgpt"]
+	path = external/detectors/seqxgpt
+	url = https://github.com/Jihuai-wpy/SeqXGPT.git
+[submodule "external/detectors/synthid_text"]
+	path = external/detectors/synthid_text
+	url = https://github.com/google-deepmind/synthid-text.git
