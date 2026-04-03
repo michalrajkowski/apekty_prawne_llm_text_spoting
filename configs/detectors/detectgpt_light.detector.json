@@ -1,0 +1,13 @@
+{
+  "detector_id": "detectgpt_light",
+  "base_model_id": "openai-community/gpt2-medium",
+  "perturbation_model_id": "google/flan-t5-small",
+  "device": "cuda",
+  "max_length": 256,
+  "perturb_max_length": 128,
+  "perturbations_per_text": 3,
+  "seed": 42,
+  "local_files_only": false,
+  "trust_remote_code": false,
+  "cache_dir": ".cache/huggingface"
+}
