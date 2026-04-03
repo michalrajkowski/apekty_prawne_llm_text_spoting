@@ -1,0 +1,28 @@
+{
+  "detector_id": "synthid_text",
+  "variant_id": "gpt2",
+  "max_supported_vram_gb": 6.0,
+  "model_variants": [
+    {
+      "variant_id": "gpt2",
+      "model_id": "openai-community/gpt2",
+      "estimated_vram_gb": 0.25
+    },
+    {
+      "variant_id": "gemma_2b",
+      "model_id": "google/gemma-2b",
+      "estimated_vram_gb": 4.0
+    },
+    {
+      "variant_id": "gemma_7b",
+      "model_id": "google/gemma-7b",
+      "estimated_vram_gb": 14.0
+    }
+  ],
+  "device": "cuda",
+  "max_length": 256,
+  "score_scale": 1.0,
+  "local_files_only": false,
+  "trust_remote_code": false,
+  "cache_dir": ".cache/huggingface"
+}
