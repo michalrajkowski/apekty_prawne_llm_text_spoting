@@ -227,11 +227,15 @@ Test Plan:
 ### Task 014 - detector integration: Binoculars
 
 Scope:
+- Verify whether the repository/upstream Binoculars integration target exposes multiple detector models/checkpoints that should be treated as separate detectors.
+- If multiple models are available, define and implement a separate adapter module for each model under `src/apm/detectors/adapters/` (shared utilities allowed, no merged single adapter path).
 - Integrate Binoculars under `src/apm/detectors/adapters/` with native detector output preserved per fidelity contract (Task 017).
 - Add config, smoke runner, and detector-special tests.
 - Ensure integration is fully compatible with current detector spec in `docs/INTEGRATING_NEW_DETECTOR.md`.
 
 Acceptance Criteria:
+- Verification result is documented in task notes/code comments: either "single model" or explicit list of supported models.
+- For multi-model support, each model has its own adapter file and its own detector config in `configs/detectors/`.
 - Adapter implements required interface (`initialize`, `predict_single`, `predict_batch`, `delete`) per `docs/INTEGRATING_NEW_DETECTOR.md`.
 - Config exists in `configs/detectors/` and smoke runner exists in `src/apm/detectors/adapters/`.
 - Detector-special tests exist in `tests/detectors/` and validate output shape/type, single-vs-batch consistency, and cleanup path.

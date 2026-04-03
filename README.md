@@ -81,7 +81,7 @@ make docker-materialize-all
 docker compose run --rm apm \
   python scratch/detector_scoring/run_detector_scores.py \
   --project-root . \
-  --examples-per-label 3
+  --examples-per-label 30
 
 docker compose run --rm apm \
   python scratch/detector_scoring/summarize_scores.py \
@@ -98,6 +98,28 @@ or:
 make docker-score
 make docker-summarize
 make docker-plot
+```
+
+`plot_detector_scores.py` now creates separate PNG plots for each model under
+`scratch/detector_scoring/results/by_model/`, with bars ordered as first 30 human samples and then 30 ai samples.
+
+### Fast-DetectGPT / Ghostbuster Smoke Validation (Docker)
+
+Each command validates score separation on HC3 interim data using 10 `human` and 10 `ai` samples
+from `data/interim/datasets/hc3/all_train/`, and writes JSON output under `runs/detectors/`.
+
+```bash
+docker compose run --rm apm \
+  python -m apm.detectors.adapters.fast_detectgpt_smoke \
+  --project-root . \
+  --samples-per-label 10 \
+  --hc3-split all_train
+
+docker compose run --rm apm \
+  python -m apm.detectors.adapters.ghostbuster_smoke \
+  --project-root . \
+  --samples-per-label 10 \
+  --hc3-split all_train
 ```
 
 ## Dataset Ingestion Foundation
