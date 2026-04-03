@@ -1,0 +1,9 @@
+{
+  "detector_id": "gltr_gpt2_small",
+  "model_id": "openai-community/gpt2",
+  "device": "cuda",
+  "max_length": 256,
+  "local_files_only": false,
+  "trust_remote_code": false,
+  "cache_dir": ".cache/huggingface"
+}
