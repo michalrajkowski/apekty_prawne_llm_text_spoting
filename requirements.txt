@@ -1,0 +1,11 @@
+datasets
+pandas
+pyarrow
+pytest
+transformers
+torch
+huggingface_hub
+kaggle
+ipykernel
+accelerate
+sentencepiece
