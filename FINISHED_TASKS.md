@@ -19,6 +19,43 @@
 - Added HC3 loader compatibility fix for modern `datasets` versions:
   - `src/apm/data/adapters/hc3_adapter.py` now loads HC3 selector JSONL files via `huggingface_hub` + `load_dataset("json", ...)` instead of dataset-script loading (`HC3.py`), preventing `Dataset scripts are no longer supported` runtime failure.
 
+### Task 015 - detector integration: Fast-DetectGPT
+- Implemented Fast-DetectGPT adapter and wiring:
+  - `src/apm/detectors/adapters/fast_detectgpt.py`
+  - `configs/detectors/fast_detectgpt.detector.json`
+  - `src/apm/detectors/adapters/fast_detectgpt_smoke.py`
+  - `tests/detectors/test_fast_detectgpt.py`
+- Added shared smoke validation helpers for detector integrations:
+  - `src/apm/detectors/adapters/smoke_validation.py`
+- Updated integration exports and scratch runner mapping:
+  - `src/apm/detectors/adapters/__init__.py`
+  - `scratch/detector_scoring/run_detector_scores.py`
+- Docker validation outcomes:
+  - targeted detector-special tests passed: `6 passed`
+  - HC3 10+10 separation check passed from `data/interim/datasets/hc3/all_train/`:
+    - `human_mean=0.6041`
+    - `ai_mean=0.7499`
+    - `separation=0.1459` (required `>=0.05`)
+  - artifact: `runs/detectors/fast_detectgpt_smoke.json`
+
+### Task 016 - detector integration: Ghostbuster
+- Implemented Ghostbuster adapter and wiring:
+  - `src/apm/detectors/adapters/ghostbuster.py`
+  - `configs/detectors/ghostbuster.detector.json`
+  - `src/apm/detectors/adapters/ghostbuster_smoke.py`
+  - `tests/detectors/test_ghostbuster.py`
+- Reused shared smoke validation helper:
+  - `src/apm/detectors/adapters/smoke_validation.py`
+- Updated docs with Docker smoke commands:
+  - `README.md`
+- Docker validation outcomes:
+  - targeted detector-special tests passed: `6 passed`
+  - HC3 10+10 separation check passed from `data/interim/datasets/hc3/all_train/`:
+    - `human_mean=0.5951`
+    - `ai_mean=0.7449`
+    - `separation=0.1498` (required `>=0.05`)
+  - artifact: `runs/detectors/ghostbuster_smoke.json`
+
 ## 2026-04-02
 
 ### Task 001 - prompt history viewer

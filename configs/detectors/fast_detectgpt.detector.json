@@ -1,0 +1,15 @@
+{
+  "detector_id": "fast_detectgpt",
+  "scoring_model_id": "openai-community/gpt2",
+  "reference_model_id": "distilgpt2",
+  "device": "cuda",
+  "max_length": 256,
+  "score_scale": 0.5,
+  "length_weight": 0.6,
+  "repetition_weight": 3.0,
+  "punctuation_weight": 8.0,
+  "bias": -1.0,
+  "local_files_only": false,
+  "trust_remote_code": false,
+  "cache_dir": ".cache/huggingface"
+}

@@ -24,7 +24,7 @@ docker-score:
 	$(DOCKER_COMPOSE) run --rm $(DOCKER_SERVICE) \
 		python scratch/detector_scoring/run_detector_scores.py \
 		--project-root . \
-		--examples-per-label 3
+		--examples-per-label 30
 
 docker-summarize:
 	$(DOCKER_COMPOSE) run --rm $(DOCKER_SERVICE) \

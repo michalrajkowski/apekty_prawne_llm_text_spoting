@@ -57,7 +57,9 @@ DETECTOR_ADAPTERS: dict[str, tuple[str, str]] = {
     "aigc_detector_env3": ("apm.detectors.adapters.aigc_detector_env3", "AIGCDetectorEnv3"),
     "aigc_detector_env3short": ("apm.detectors.adapters.aigc_detector_env3short", "AIGCDetectorEnv3Short"),
     "detectgpt_light": ("apm.detectors.adapters.detectgpt_light", "DetectGptLightDetector"),
+    "fast_detectgpt": ("apm.detectors.adapters.fast_detectgpt", "FastDetectGptDetector"),
     "gltr_gpt2_small": ("apm.detectors.adapters.gltr_gpt2_small", "GLTRGpt2SmallDetector"),
+    "ghostbuster": ("apm.detectors.adapters.ghostbuster", "GhostbusterDetector"),
     "radar_vicuna_7b": ("apm.detectors.adapters.radar_vicuna_7b", "RadarVicuna7BDetector"),
     "seqxgpt": ("apm.detectors.adapters.seqxgpt", "SeqXGPTDetector"),
     "synthid_text": ("apm.detectors.adapters.synthid_text", "SynthIDTextDetector"),
@@ -82,8 +84,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--examples-per-label",
         type=int,
-        default=3,
-        help="How many examples to load per label (human/ai) from each dataset.",
+        default=30,
+        help="How many examples to load per label (human/ai) in total across configured datasets.",
     )
     parser.add_argument(
         "--output-jsonl",
@@ -108,11 +110,11 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def _load_examples(project_root: Path, examples_per_label: int) -> list[Example]:
-    examples: list[Example] = []
-    counters: dict[str, int] = {"human": 0, "ai": 0}
+    by_label: dict[str, list[Example]] = {"human": [], "ai": []}
 
-    for dataset in DEFAULT_DATASETS:
-        for label in ("human", "ai"):
+    for label in ("human", "ai"):
+        collected = 0
+        for dataset in DEFAULT_DATASETS:
             source_path = (
                 project_root
                 / "data"
@@ -126,22 +128,20 @@ def _load_examples(project_root: Path, examples_per_label: int) -> list[Example]
             if not source_path.exists():
                 raise FileNotFoundError(f"Missing sampled records file: {source_path}")
             rows = _read_jsonl(source_path)
-            if len(rows) < examples_per_label:
-                raise ValueError(
-                    f"Need at least {examples_per_label} '{label}' rows in {source_path}, got {len(rows)}."
-                )
 
-            for row in rows[:examples_per_label]:
+            for row in rows:
+                if collected >= examples_per_label:
+                    break
                 text = row.get("text")
                 sample_id = row.get("sample_id")
                 if not isinstance(text, str):
                     raise ValueError(f"Row missing string 'text' field in {source_path}.")
                 if not isinstance(sample_id, str):
                     raise ValueError(f"Row missing string 'sample_id' field in {source_path}.")
-                counters[label] += 1
-                examples.append(
+                collected += 1
+                by_label[label].append(
                     Example(
-                        example_id=f"{label}_{counters[label]}",
+                        example_id=f"{label}_{collected}",
                         label=label,
                         dataset_id=dataset.dataset_id,
                         split=dataset.split,
@@ -150,7 +150,16 @@ def _load_examples(project_root: Path, examples_per_label: int) -> list[Example]
                     )
                 )
 
-    return examples
+            if collected >= examples_per_label:
+                break
+
+        if collected < examples_per_label:
+            raise ValueError(
+                f"Need {examples_per_label} '{label}' examples across configured datasets, got {collected}."
+            )
+
+    # Keep strict order for downstream per-model plots: first all human, then all ai.
+    return by_label["human"] + by_label["ai"]
 
 
 def _build_model_runs(project_root: Path) -> list[ModelRunSpec]:

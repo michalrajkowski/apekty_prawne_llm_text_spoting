@@ -1733,3 +1733,482 @@ TAGS: [execution]
 AGENT:
 
 ---
+2026-04-03 14:06:49
+USER:
+```text
+# AGENTS.md instructions for /home/micraj/micraj/aspekty_prawne
+
+<INSTRUCTIONS>
+# Agents.md
+
+The repository's main goal is to compare GPT/AI text detectors on benchmark datasets and custom documents, apply techniques that obfuscate/modify LLM-generated text, and verify whether those techniques make GPT detectors less confident that the text is human-written.
+
+## Prompt History
+
+1. After each user message, archive it in `prompt_history/PROMPTS_HISTORY.md`.
+2. Every archived block must include date + time only (no timezone suffix), e.g. `YYYY-MM-DD HH:MM:SS`.
+3. Assign exactly one primary intention tag for each user message (optionally add secondary tags).
+4. Use only tags from this list: `dialog`, `question`, `code_review`, `execution`, `retrieval`, `planning`, `debugging`, `creative`, `transformation`.
+
+### Non-Negotiable Prompt History Rules
+
+1. Copied user messages must be copied exactly as written.
+2. Never summarize user messages.
+3. Never correct user typos/grammar in archived user messages.
+4. Only summarize agent messages.
+5. Prompt history must look like a chat and use the exact structure below.
+
+### Required Format
+
+````md
+# Prompt History
+
+<date + timestamp>
+USER:
+```text
+<user message copied exactly>
+```
+TAGS: [<primary_tag>, <optional_secondary_tag>]
+---
+<date + timestamp>
+AGENT:
+```text
+<summarized message>
+```
+---
+````
+
+## Development Workflow
+
+1. Pull the next task from `TASKS.md` (`Queue` section).
+2. Move the task to `In Progress` and keep scope minimal.
+3. Implement the change with tests where practical (`tests/`), especially for deterministic logic.
+4. Run linting/checking only for touched Python files, and never run these tools on GitHub submodule scripts.
+5. Update docs when behavior, interfaces, workflow, or experiment conventions change.
+6. Move completed tasks to `FINISHED_TASKS.md` with completion date and short outcome.
+
+## Linting and Checking Scope
+
+1. Run linters/checkers only on Python files.
+2. Exclude GitHub submodule scripts from linting/checking runs.
+
+## Research and Reproducibility Constraints
+
+1. Treat the repository as scientific research infrastructure, not a one-off script collection.
+2. Keep project initialization reproducible via initialization files/scripts so a clean machine can bootstrap the environment.
+3. Prioritize Dockerized workflows with mounted host folders (at minimum `data/` and `runs/`) so collaborators can run experiments locally with consistent setup.
+4. Ensure experiments and text operations are reproducible by explicit seeds; do not add nondeterministic experiment paths without seed control.
+
+## Task Files Policy
+
+1. `TASKS.md` is the active execution queue and planning board.
+2. `FINISHED_TASKS.md` is the immutable archive of completed tasks.
+3. Keep task IDs stable once assigned.
+
+## Python Code Rules (Non-Negotiable)
+
+These rules must never be violated in newly created or modified Python files:
+
+1. All code must be correctly typed, including function/method signatures and return types.
+2. Imports must be declared only at the top of the file. Do not place imports inside functions/methods/branches.
+3. Every Python file must have a concise, up-to-date module docstring at the top of the file.
+4. Avoid `try`/`except` unless truly necessary. Do not add broad or flow-obscuring exception handling that makes program behavior unpredictable.
+
+</INSTRUCTIONS><environment_context>
+  <cwd>/home/micraj/micraj/aspekty_prawne</cwd>
+  <shell>bash</shell>
+  <current_date>2026-04-03</current_date>
+  <timezone>Europe/Warsaw</timezone>
+</environment_context>
+```
+TAGS: [execution]
+---
+2026-04-03 14:06:50
+AGENT:
+```text
+Applied the AGENTS.md repository instructions as active working constraints for subsequent analysis and edits.
+```
+---
+2026-04-03 14:06:51
+USER:
+```text
+(.venv) micraj@workerAMD:~/micraj/aspekty_prawne$ docker compose build apm
+Compose can now delegate builds to bake for better performance.
+ To do so, set COMPOSE_BAKE=true.
+[+] Building 191.4s (13/13) FINISHED                                                                                                       docker:default
+ => [apm internal] load build definition from Dockerfile                                                                                             0.0s
+ => => transferring dockerfile: 786B                                                                                                                 0.0s
+ => [apm internal] load metadata for docker.io/library/python:3.13.2-slim-bookworm                                                                   1.5s
+ => [apm internal] load .dockerignore                                                                                                                0.0s
+ => => transferring context: 240B                                                                                                                    0.0s
+ => [apm internal] load build context                                                                                                                0.0s
+ => => transferring context: 2.29kB                                                                                                                  0.0s
+ => [apm 1/7] FROM docker.io/library/python:3.13.2-slim-bookworm@sha256:6b3223eb4d93718828223966ad316909c39813dee3ee9395204940500792b740             2.4s
+ => => resolve docker.io/library/python:3.13.2-slim-bookworm@sha256:6b3223eb4d93718828223966ad316909c39813dee3ee9395204940500792b740                 0.0s
+ => => sha256:2c672e0471fb7888ec4a8553101b8d9f2af1a01f7cf174c09e22e1a9b3e2db70 3.51MB / 3.51MB                                                       0.7s
+ => => sha256:e1860f6e4e054049511f7661734ef07393e3dcc9c60b148aa1a060c6eff99718 12.58MB / 12.58MB                                                     0.7s
+ => => sha256:6b3223eb4d93718828223966ad316909c39813dee3ee9395204940500792b740 9.12kB / 9.12kB                                                       0.0s
+ => => sha256:0b3498e251759df85a00474be7d3b791d6abe1600ce3531a649e42964749655f 1.75kB / 1.75kB                                                       0.0s
+ => => sha256:126799e6232bdb19aaaa0ef504f10bb25f3ee1cb05ca7fb6fa5be18cb2385b9a 5.37kB / 5.37kB                                                       0.0s
+ => => sha256:8a628cdd7ccc83e90e5a95888fcb0ec24b991141176c515ad101f12d6433eb96 28.23MB / 28.23MB                                                     0.8s
+ => => sha256:9b226e61ce4a02d9f6209995017c25196fff5f803f32d6d8c12ac8a7212a46b5 250B / 250B                                                           1.0s
+ => => extracting sha256:8a628cdd7ccc83e90e5a95888fcb0ec24b991141176c515ad101f12d6433eb96                                                            0.8s
+ => => extracting sha256:2c672e0471fb7888ec4a8553101b8d9f2af1a01f7cf174c09e22e1a9b3e2db70                                                            0.1s
+ => => extracting sha256:e1860f6e4e054049511f7661734ef07393e3dcc9c60b148aa1a060c6eff99718                                                            0.5s
+ => => extracting sha256:9b226e61ce4a02d9f6209995017c25196fff5f803f32d6d8c12ac8a7212a46b5                                                            0.0s
+ => [apm 2/7] RUN apt-get update     && apt-get install -y --no-install-recommends         ca-certificates         curl         git         unzip   10.7s
+ => [apm 3/7] RUN python -m venv "/opt/venv"                                                                                                         3.1s
+ => [apm 4/7] WORKDIR /workspace                                                                                                                     0.3s
+ => [apm 5/7] COPY requirements.lock.txt /tmp/requirements.lock.txt                                                                                  0.3s
+ => [apm 6/7] COPY requirements.txt /tmp/requirements.txt                                                                                            0.3s
+ => [apm 7/7] RUN pip install --upgrade pip==26.0.1 setuptools==81.0.0 wheel     && pip install -r /tmp/requirements.lock.txt                      153.9s
+ => [apm] exporting to image                                                                                                                        18.5s
+ => => exporting layers                                                                                                                             18.5s
+ => => writing image sha256:32848550f3829b6067e8d0c7ec350607953338914fd7277753d1f2aacd6e14f2                                                         0.0s
+ => => naming to docker.io/library/apm-research:py3.13.2-gpu                                                                                         0.0s
+ => [apm] resolving provenance for metadata file                                                                                                     0.0s
+[+] Building 1/1
+ ✔ apm  Built                                                                                                                                        0.0s 
+(.venv) micraj@workerAMD:~/micraj/aspekty_prawne$ docker compose run --rm apm \
+  python -m apm.data.materialize_all \
+  --project-root . \
+  --config-dir configs/datasets \
+  --sample-size 100 \
+  --seed 42
+[+] Creating 1/1
+ ✔ Network aspekty_prawne_default  Created                                                                                                           0.1s 
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+all.jsonl: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 73.7M/73.7M [00:02<00:00, 36.2MB/s]
+Generating train split: 24322 examples [00:00, 42928.06 examples/s]
+finance.jsonl: 9.89MB [00:00, 93.7MB/s]
+Generating train split: 3933 examples [00:00, 56251.29 examples/s]
+medicine.jsonl: 2.68MB [00:00, 94.8MB/s]
+Generating train split: 1248 examples [00:00, 58414.80 examples/s]
+open_qa.jsonl: 2.91MB [00:00, 130MB/s]
+Generating train split: 1187 examples [00:00, 54636.47 examples/s]
+reddit_eli5.jsonl: 100%|█████████████████████████████████████████████████████████████████████████████████████████████| 55.4M/55.4M [00:01<00:00, 54.6MB/s]
+Generating train split: 17112 examples [00:00, 39870.00 examples/s]
+wiki_csai.jsonl: 2.20MB [00:00, 35.2MB/s]
+Generating train split: 842 examples [00:00, 78892.08 examples/s]
+You must authenticate before you can call the Kaggle API.
+Follow the instructions to authenticate at: https://github.com/Kaggle/kaggle-cli/blob/main/docs/README.md#authentication
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/src/apm/data/materialize_all.py", line 240, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/workspace/src/apm/data/materialize_all.py", line 227, in main
+    report = materialize_all_datasets(
+        project_root=args.project_root,
+    ...<4 lines>...
+        seed=args.seed,
+    )
+  File "/workspace/src/apm/data/materialize_all.py", line 146, in materialize_all_datasets
+    split_outputs = materializer(project_root, config_path, sample_size, seed)
+  File "/workspace/src/apm/data/adapters/kaggle_llm_detect_ai_generated_text_materialize.py", line 42, in materialize_kaggle_llm_detect_ai_generated_text_samples
+    adapter.ensure_sources_available()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/workspace/src/apm/data/adapters/kaggle_llm_detect_ai_generated_text_adapter.py", line 377, in ensure_sources_available
+    ensure_kaggle_sources_available(config=self._config, project_root=self._project_root)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/apm/data/adapters/kaggle_llm_detect_ai_generated_text_adapter.py", line 225, in ensure_kaggle_sources_available
+    _run_kaggle_download(
+    ~~~~~~~~~~~~~~~~~~~~^
+        download_dir=download_dir,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        competition=download_config.competition,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        force_download=download_config.force_download,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/workspace/src/apm/data/adapters/kaggle_llm_detect_ai_generated_text_adapter.py", line 190, in _run_kaggle_download
+    subprocess.run(command, check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/subprocess.py", line 579, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['/opt/venv/bin/kaggle', 'competitions', 'download', '-c', 'llm-detect-ai-generated-text', '-p', 'data/raw/datasets/kaggle_llm_detect_ai_generated_text']' returned non-zero exit status 1.
+
+(.venv) micraj@workerAMD:~/micraj/aspekty_prawne$ ^C
+(.venv) micraj@workerAMD:~/micraj/aspekty_prawne$ 
+
+
+Analyze the log error and kaggle download code. What is the reason for this error?
+```
+TAGS: [debugging, question]
+---
+2026-04-03 14:07:20
+AGENT:
+```text
+Mapped the traceback to Kaggle adapter download logic and identified missing Kaggle authentication inside the container as the direct cause of subprocess failure.
+```
+---
+2026-04-03 14:11:35
+USER:
+```text
+command to run docker compose, i want to copy from inside container my kaggle.json to .kaggle
+```
+TAGS: [execution]
+---
+2026-04-03 14:16:45
+USER:
+```text
+my file in the project i want to copy is this 
+kaggle.json
+```
+TAGS: [execution]
+---
+2026-04-03 14:19:07
+USER:
+```text
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+401 Client Error: Unauthorized for url: https://api.kaggle.com/v1/competitions.CompetitionApiService/DownloadDataFiles
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/src/apm/data/materialize_all.py", line 240, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/workspace/src/apm/data/materialize_all.py", line 227, in main
+    report = materialize_all_datasets(
+        project_root=args.project_root,
+    ...<4 lines>...
+        seed=args.seed,
+    )
+  File "/workspace/src/apm/data/materialize_all.py", line 146, in materialize_all_datasets
+    split_outputs = materializer(project_root, config_path, sample_size, seed)
+  File "/workspace/src/apm/data/adapters/kaggle_llm_detect_ai_generated_text_materialize.py", line 42, in materialize_kaggle_llm_detect_ai_generated_text_samples
+    adapter.ensure_sources_available()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/workspace/src/apm/data/adapters/kaggle_llm_detect_ai_generated_text_adapter.py", line 377, in ensure_sources_available
+    ensure_kaggle_sources_available(config=self._config, project_root=self._project_root)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/apm/data/adapters/kaggle_llm_detect_ai_generated_text_adapter.py", line 225, in ensure_kaggle_sources_available
+    _run_kaggle_download(
+    ~~~~~~~~~~~~~~~~~~~~^
+        download_dir=download_dir,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        competition=download_config.competition,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        force_download=download_config.force_download,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/workspace/src/apm/data/adapters/kaggle_llm_detect_ai_generated_text_adapter.py", line 190, in _run_kaggle_download
+    subprocess.run(command, check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/subprocess.py", line 579, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['/opt/venv/bin/kaggle', 'competitions', 'download', '-c', 'llm-detect-ai-generated-text', '-p', 'data/raw/datasets/kaggle_llm_detect_ai_generated_text']' returned non-zero exit status 1.
+
+maybe it requires some additional autentication from within the container. 
+
+Or during the image building. 
+```
+TAGS: [debugging]
+---
+2026-04-03 14:19:50
+AGENT:
+```text
+Validated container-side Kaggle credential path and reproduced 401 with absolute Kaggle CLI; identified credentials are being read but authorization still fails, indicating invalid username/key or missing competition access acceptance.
+```
+---
+2026-04-03 14:27:43
+USER:
+```text
+root@53cfac70dba8:/workspace/.kaggle# cat kaggle.json 
+{"username":"micharajkowski","key":"<my token>"}
+root@53cfac70dba8:/workspace/.kaggle# export KAGGLE_API_TOKEN=<my token>
+root@53cfac70dba8:/workspace/.kaggle# kaggle competitions list -s llm-detect-ai-generated-text
+ref                                                               deadline             category       reward  teamCount  userHasEntered  
+----------------------------------------------------------------  -------------------  --------  -----------  ---------  --------------  
+https://www.kaggle.com/competitions/llm-detect-ai-generated-text  2024-01-22 23:59:00  Featured  110,000 Usd       4358            True  
+root@53cfac70dba8:/workspace/.kaggle# 
+
+So it should work
+```
+TAGS: [debugging]
+---
+2026-04-03 14:27:44
+AGENT:
+```text
+Confirmed this indicates baseline Kaggle auth visibility and prepared a targeted check for the exact /opt/venv/bin/kaggle download command used by materialization.
+```
+---
+2026-04-03 14:49:28
+USER:
+```text
+# AGENTS.md instructions for /home/micraj/micraj/aspekty_prawne
+
+<INSTRUCTIONS>
+# Agents.md
+
+The repository's main goal is to compare GPT/AI text detectors on benchmark datasets and custom documents, apply techniques that obfuscate/modify LLM-generated text, and verify whether those techniques make GPT detectors less confident that the text is human-written.
+
+## Prompt History
+
+1. After each user message, archive it in `prompt_history/PROMPTS_HISTORY.md`.
+2. Every archived block must include date + time only (no timezone suffix), e.g. `YYYY-MM-DD HH:MM:SS`.
+3. Assign exactly one primary intention tag for each user message (optionally add secondary tags).
+4. Use only tags from this list: `dialog`, `question`, `code_review`, `execution`, `retrieval`, `planning`, `debugging`, `creative`, `transformation`.
+
+### Non-Negotiable Prompt History Rules
+
+1. Copied user messages must be copied exactly as written.
+2. Never summarize user messages.
+3. Never correct user typos/grammar in archived user messages.
+4. Only summarize agent messages.
+5. Prompt history must look like a chat and use the exact structure below.
+
+### Required Format
+
+````md
+# Prompt History
+
+<date + timestamp>
+USER:
+```text
+<user message copied exactly>
+```
+TAGS: [<primary_tag>, <optional_secondary_tag>]
+---
+<date + timestamp>
+AGENT:
+```text
+<summarized message>
+```
+---
+````
+
+## Development Workflow
+
+1. Pull the next task from `TASKS.md` (`Queue` section).
+2. Move the task to `In Progress` and keep scope minimal.
+3. Implement the change with tests where practical (`tests/`), especially for deterministic logic.
+4. Run linting/checking only for touched Python files, and never run these tools on GitHub submodule scripts.
+5. Update docs when behavior, interfaces, workflow, or experiment conventions change.
+6. Move completed tasks to `FINISHED_TASKS.md` with completion date and short outcome.
+
+## Linting and Checking Scope
+
+1. Run linters/checkers only on Python files.
+2. Exclude GitHub submodule scripts from linting/checking runs.
+
+## Research and Reproducibility Constraints
+
+1. Treat the repository as scientific research infrastructure, not a one-off script collection.
+2. Keep project initialization reproducible via initialization files/scripts so a clean machine can bootstrap the environment.
+3. Prioritize Dockerized workflows with mounted host folders (at minimum `data/` and `runs/`) so collaborators can run experiments locally with consistent setup.
+4. Ensure experiments and text operations are reproducible by explicit seeds; do not add nondeterministic experiment paths without seed control.
+
+## Task Files Policy
+
+1. `TASKS.md` is the active execution queue and planning board.
+2. `FINISHED_TASKS.md` is the immutable archive of completed tasks.
+3. Keep task IDs stable once assigned.
+
+## Python Code Rules (Non-Negotiable)
+
+These rules must never be violated in newly created or modified Python files:
+
+1. All code must be correctly typed, including function/method signatures and return types.
+2. Imports must be declared only at the top of the file. Do not place imports inside functions/methods/branches.
+3. Every Python file must have a concise, up-to-date module docstring at the top of the file.
+4. Avoid `try`/`except` unless truly necessary. Do not add broad or flow-obscuring exception handling that makes program behavior unpredictable.
+
+</INSTRUCTIONS><environment_context>
+  <cwd>/home/micraj/micraj/aspekty_prawne</cwd>
+  <shell>bash</shell>
+  <current_date>2026-04-03</current_date>
+  <timezone>Europe/Warsaw</timezone>
+</environment_context>
+```
+TAGS: [execution]
+---
+2026-04-03 14:49:29
+USER:
+```text
+modify the description of tasks 14, 15, and 16 to verify if the repo contains many potential detectors. If so, there should be separate adapter for each model. (modify the tasks)
+```
+TAGS: [execution]
+---
+2026-04-03 14:50:30
+AGENT:
+```text
+Updated tasks 014–016 to require detector inventory verification and separate per-model adapters when multiple models/checkpoints exist; archived latest user messages in prompt history.
+```
+---
+2026-04-03 14:50:31
+USER:
+```text
+WE have new task for some detectors. Find their repository / descriptions online and verify what type of outputs they produce. Which of them output probabilities as (0,1) score of human text vs ai text
+```
+TAGS: [retrieval]
+---
+2026-04-03 15:20:00
+AGENT:
+```text
+Verified online outputs for Binoculars, Fast-DetectGPT, and Ghostbuster; reported that Fast-DetectGPT and Ghostbuster expose AI-probability style outputs, while Binoculars is thresholded-score based.
+```
+---
+2026-04-03 15:20:01
+USER:
+```text
+do the integration tasks for the 2 models that are using probabilities.
+(Fast-DetectGPT (AI probability)
+Ghostbuster (AI probability))
+
+Before you integrate them add information to each tasks that the model should be tested with 10 samples of hguman and 10 samples of ai from dataset data/interim/datasets/hc3 and checked if the scores for human are much lower than for ai. 
+
+Remember that after you finish the tasks should be moved to finish tasks. 
+
+Remember that we are currently working with docker so running everything should be from within the container
+```
+TAGS: [execution]
+---
+2026-04-03 15:33:30
+AGENT:
+```text
+Integrated Fast-DetectGPT and Ghostbuster adapters with configs, smoke validators, detector-special tests, Docker execution, and moved Tasks 015/016 to FINISHED_TASKS.
+```
+---
+2026-04-03 15:33:31
+USER:
+```text
+integrate those quickly to our scratch/detector_scoring
+
+Then i want to modify how the scratch is working. For each model it should take more ai anod more human samples. 
+
+Then create plots separeate for each model (on the plot first 30 human samples and bar scores, then 30 ai sample and bar scores). 
+```
+TAGS: [execution]
+---
+2026-04-03 15:39:09
+AGENT:
+```text
+Integrated new probability detectors into scratch scoring, increased per-label sampling defaults, and changed plotting to separate per-model charts ordered as human then ai.
+```
+---
+2026-04-03 15:39:10
+USER:
+```text
+git add necesery files from previousley finished tasks. (integration of the new model + scratch changes + finished_tasks.md / taks.md / readme end so on. Then rpopose commit message
+```
+TAGS: [execution]
+---
+2026-04-03 15:39:58
+AGENT:
+```text
+Staged integration, scratch, docs, and task-tracking files; left unrelated lockfile and generated run artifacts unstaged; proposed commit message.
+```
+---
+2026-04-03 15:39:59
+USER:
+```text
+commit
+```
+TAGS: [execution]
+---

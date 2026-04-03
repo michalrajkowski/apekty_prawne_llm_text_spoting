@@ -1,4 +1,4 @@
-"""Scratch helper: plot grouped detector scores for all sampled examples."""
+"""Scratch helper: create separate per-model score bar charts."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Plot detector score comparison bar chart.")
+    parser = argparse.ArgumentParser(description="Plot one detector score chart per model.")
     parser.add_argument(
         "--summary-json",
         type=Path,
@@ -19,12 +19,14 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         help="Input summary JSON produced by summarize_scores.py.",
     )
     parser.add_argument(
-        "--output-png",
+        "--output-dir",
         type=Path,
-        default=Path("scratch/detector_scoring/results/detector_scores_barplot.png"),
-        help="Output PNG path for bar chart.",
+        default=Path("scratch/detector_scoring/results/by_model"),
+        help="Output directory for per-model PNG charts.",
     )
     parser.add_argument("--project-root", type=Path, default=Path.cwd(), help="Repository root directory.")
+    parser.add_argument("--human-samples", type=int, default=30, help="How many human samples to plot.")
+    parser.add_argument("--ai-samples", type=int, default=30, help="How many ai samples to plot.")
     parser.add_argument("--dpi", type=int, default=180, help="Plot DPI.")
     return parser
 
@@ -36,53 +38,83 @@ def _load_json(path: Path) -> dict[str, Any]:
     return parsed
 
 
-def _plot(summary: dict[str, Any], output_path: Path, dpi: int) -> None:
-    example_ids = summary.get("example_ids")
-    model_ids = summary.get("model_ids")
-    scores_matrix_by_model = summary.get("scores_matrix_by_model")
+def _sanitize_model_id(model_id: str) -> str:
+    safe = model_id.replace("/", "_").replace(":", "_").replace(" ", "_")
+    return safe
 
-    if not isinstance(example_ids, list):
-        raise ValueError("Summary field 'example_ids' must be a list.")
-    if not isinstance(model_ids, list):
-        raise ValueError("Summary field 'model_ids' must be a list.")
-    if not isinstance(scores_matrix_by_model, list):
-        raise ValueError("Summary field 'scores_matrix_by_model' must be a list.")
 
-    num_examples = len(example_ids)
-    num_models = len(model_ids)
-    if num_examples == 0 or num_models == 0:
-        raise ValueError("Summary must contain at least one example and one model.")
+def _select_plot_rows(
+    *,
+    scores: list[float],
+    labels: list[str],
+    human_samples: int,
+    ai_samples: int,
+) -> tuple[list[str], list[float], list[str], int]:
+    human_values: list[float] = []
+    ai_values: list[float] = []
 
-    x_positions = list(range(num_examples))
-    bar_group_width = 0.86
-    bar_width = bar_group_width / num_models
-    start_offset = -bar_group_width / 2 + bar_width / 2
+    for score, label in zip(scores, labels, strict=True):
+        if label == "human" and len(human_values) < human_samples:
+            human_values.append(float(score))
+        if label == "ai" and len(ai_values) < ai_samples:
+            ai_values.append(float(score))
+        if len(human_values) == human_samples and len(ai_values) == ai_samples:
+            break
 
-    figure_width = max(14.0, num_examples * 0.8)
-    fig, ax = plt.subplots(figsize=(figure_width, 8.0))
+    if len(human_values) < human_samples:
+        raise ValueError(
+            f"Requested {human_samples} human samples but only {len(human_values)} available in summary order."
+        )
+    if len(ai_values) < ai_samples:
+        raise ValueError(f"Requested {ai_samples} ai samples but only {len(ai_values)} available in summary order.")
 
-    cmap = plt.get_cmap("tab20")
-    for model_index, model_id in enumerate(model_ids):
-        model_scores = scores_matrix_by_model[model_index]
-        if not isinstance(model_scores, list):
-            raise ValueError("Each score matrix row must be a list.")
-        if len(model_scores) != num_examples:
-            raise ValueError(
-                f"Model '{model_id}' has {len(model_scores)} scores, expected {num_examples}."
-            )
+    x_labels = [f"H{i + 1}" for i in range(human_samples)] + [f"A{i + 1}" for i in range(ai_samples)]
+    ordered_values = human_values + ai_values
+    colors = ["#3A86FF"] * human_samples + ["#FF006E"] * ai_samples
+    return x_labels, ordered_values, colors, human_samples
 
-        offsets = [x + start_offset + model_index * bar_width for x in x_positions]
-        color = cmap(model_index % 20)
-        ax.bar(offsets, model_scores, width=bar_width, label=str(model_id), color=color)
 
-    ax.set_title("Detector Scores Per Example")
-    ax.set_xlabel("Example ID")
+def _plot_one_model(
+    *,
+    model_id: str,
+    scores: list[float],
+    labels: list[str],
+    output_path: Path,
+    human_samples: int,
+    ai_samples: int,
+    dpi: int,
+) -> None:
+    x_labels, ordered_values, colors, human_count = _select_plot_rows(
+        scores=scores,
+        labels=labels,
+        human_samples=human_samples,
+        ai_samples=ai_samples,
+    )
+
+    x_positions = list(range(len(ordered_values)))
+    fig_width = max(14.0, len(ordered_values) * 0.26)
+    fig, ax = plt.subplots(figsize=(fig_width, 6.2))
+
+    ax.bar(x_positions, ordered_values, color=colors, width=0.85)
+    ax.axvline(x=human_count - 0.5, color="#444444", linestyle="--", linewidth=1.0)
+    ax.text(human_count / 2.0 - 0.5, 1.02, "HUMAN", ha="center", va="bottom", fontsize=10, transform=ax.get_xaxis_transform())
+    ax.text(
+        human_count + (len(ordered_values) - human_count) / 2.0 - 0.5,
+        1.02,
+        "AI",
+        ha="center",
+        va="bottom",
+        fontsize=10,
+        transform=ax.get_xaxis_transform(),
+    )
+
+    ax.set_title(f"{model_id} scores: first {human_samples} human, then {ai_samples} ai")
+    ax.set_xlabel("Ordered samples")
     ax.set_ylabel("Score")
     ax.set_xticks(x_positions)
-    ax.set_xticklabels([str(example_id) for example_id in example_ids], rotation=45, ha="right")
+    ax.set_xticklabels(x_labels, rotation=90)
     ax.set_ylim(0.0, 1.0)
     ax.grid(axis="y", linestyle="--", alpha=0.35)
-    ax.legend(loc="upper left", bbox_to_anchor=(1.01, 1.0), fontsize=8)
 
     fig.tight_layout()
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -90,17 +122,64 @@ def _plot(summary: dict[str, Any], output_path: Path, dpi: int) -> None:
     plt.close(fig)
 
 
+def _plot(summary: dict[str, Any], output_dir: Path, human_samples: int, ai_samples: int, dpi: int) -> list[Path]:
+    model_ids = summary.get("model_ids")
+    scores_matrix_by_model = summary.get("scores_matrix_by_model")
+    example_labels = summary.get("example_labels")
+
+    if not isinstance(model_ids, list):
+        raise ValueError("Summary field 'model_ids' must be a list.")
+    if not isinstance(scores_matrix_by_model, list):
+        raise ValueError("Summary field 'scores_matrix_by_model' must be a list.")
+    if not isinstance(example_labels, list):
+        raise ValueError("Summary field 'example_labels' must be a list.")
+    if len(model_ids) != len(scores_matrix_by_model):
+        raise ValueError("Summary 'model_ids' and 'scores_matrix_by_model' length mismatch.")
+
+    created_paths: list[Path] = []
+    for model_id, model_scores_raw in zip(model_ids, scores_matrix_by_model, strict=True):
+        if not isinstance(model_id, str):
+            raise ValueError("Each model id must be a string.")
+        if not isinstance(model_scores_raw, list):
+            raise ValueError(f"Model '{model_id}' scores must be a list.")
+        if len(model_scores_raw) != len(example_labels):
+            raise ValueError(
+                f"Model '{model_id}' has {len(model_scores_raw)} scores but there are {len(example_labels)} labels."
+            )
+
+        model_scores = [float(value) for value in model_scores_raw]
+        output_path = output_dir / f"{_sanitize_model_id(model_id)}.png"
+        _plot_one_model(
+            model_id=model_id,
+            scores=model_scores,
+            labels=[str(label) for label in example_labels],
+            output_path=output_path,
+            human_samples=human_samples,
+            ai_samples=ai_samples,
+            dpi=dpi,
+        )
+        created_paths.append(output_path)
+
+    return created_paths
+
+
 def main() -> int:
     parser = _build_arg_parser()
     args = parser.parse_args()
 
     summary_path = (args.project_root / args.summary_json).resolve()
-    output_path = (args.project_root / args.output_png).resolve()
+    output_dir = (args.project_root / args.output_dir).resolve()
 
     summary = _load_json(summary_path)
-    _plot(summary=summary, output_path=output_path, dpi=args.dpi)
+    created_paths = _plot(
+        summary=summary,
+        output_dir=output_dir,
+        human_samples=args.human_samples,
+        ai_samples=args.ai_samples,
+        dpi=args.dpi,
+    )
 
-    print(f"Saved bar plot to: {output_path}")
+    print(f"Saved {len(created_paths)} per-model bar plots to: {output_dir}")
     return 0
 
 
