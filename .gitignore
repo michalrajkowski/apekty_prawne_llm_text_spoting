@@ -221,3 +221,6 @@ configs/credentials/*.json
 data/**
 !data/custom/
 !data/custom/**
+
+# Scratch detector-scoring outputs (never track generated results)
+scratch/detector_scoring/results/
