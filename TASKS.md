@@ -129,6 +129,66 @@ Test Plan:
 - Add abstraction method compliance tests and adapter output-shape tests.
 - Run targeted smoke inference on at least 10 texts and verify artifacts and exit status.
 
+### Task 014 - detector integration: Binoculars
+
+Scope:
+- Integrate Binoculars under `src/apm/detectors/adapters/` as a detector that outputs class-probability style scores.
+- Add config, smoke runner, and detector-special tests.
+- Ensure integration is fully compatible with current detector spec in `docs/INTEGRATING_NEW_DETECTOR.md`.
+
+Acceptance Criteria:
+- Adapter implements required interface (`initialize`, `predict_single`, `predict_batch`, `delete`) per `docs/INTEGRATING_NEW_DETECTOR.md`.
+- Config exists in `configs/detectors/` and smoke runner exists in `src/apm/detectors/adapters/`.
+- Detector-special tests exist in `tests/detectors/` and validate output shape/type, single-vs-batch consistency, and cleanup path.
+- Returned outputs are usable as detector confidence/probability scores.
+
+Decision Notes:
+- Keep implementation focused on inference path and reproducible runtime configuration.
+
+Test Plan:
+- Add `tests/detectors/test_binoculars.py` with marker `detector_special`.
+- Run targeted suite: `pytest -q -m detector_special tests/detectors/test_binoculars.py`.
+
+### Task 015 - detector integration: Fast-DetectGPT
+
+Scope:
+- Integrate Fast-DetectGPT under `src/apm/detectors/adapters/` as a detector returning class/confidence scores.
+- Add config, smoke runner, and detector-special tests.
+- Ensure integration is fully compatible with current detector spec in `docs/INTEGRATING_NEW_DETECTOR.md`.
+
+Acceptance Criteria:
+- Adapter implements required interface (`initialize`, `predict_single`, `predict_batch`, `delete`) per `docs/INTEGRATING_NEW_DETECTOR.md`.
+- Config exists in `configs/detectors/` and smoke runner exists in `src/apm/detectors/adapters/`.
+- Detector-special tests validate output shape/type, single-vs-batch consistency, and cleanup path.
+- Returned outputs are usable as detector confidence/probability scores.
+
+Decision Notes:
+- Prioritize stable adapter behavior and deterministic config-driven execution.
+
+Test Plan:
+- Add `tests/detectors/test_fast_detectgpt.py` with marker `detector_special`.
+- Run targeted suite: `pytest -q -m detector_special tests/detectors/test_fast_detectgpt.py`.
+
+### Task 016 - detector integration: Ghostbuster
+
+Scope:
+- Integrate Ghostbuster under `src/apm/detectors/adapters/` with output mapped to class/confidence score format.
+- Add config, smoke runner, and detector-special tests.
+- Ensure integration is fully compatible with current detector spec in `docs/INTEGRATING_NEW_DETECTOR.md`.
+
+Acceptance Criteria:
+- Adapter implements required interface (`initialize`, `predict_single`, `predict_batch`, `delete`) per `docs/INTEGRATING_NEW_DETECTOR.md`.
+- Config exists in `configs/detectors/` and smoke runner exists in `src/apm/detectors/adapters/`.
+- Detector-special tests validate output shape/type, single-vs-batch consistency, and cleanup path.
+- Returned outputs are usable as detector confidence/probability scores.
+
+Decision Notes:
+- If upstream requires API-backed calls, keep adapter contract unchanged and surface required credentials/config explicitly.
+
+Test Plan:
+- Add `tests/detectors/test_ghostbuster.py` with marker `detector_special`.
+- Run targeted suite: `pytest -q -m detector_special tests/detectors/test_ghostbuster.py`.
+
 ### Task 006 - final integration and reproducibility hardening
 
 Scope:
