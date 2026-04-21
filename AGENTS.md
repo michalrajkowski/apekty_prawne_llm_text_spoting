@@ -2,41 +2,6 @@
 
 The repository's main goal is to compare GPT/AI text detectors on benchmark datasets and custom documents, apply techniques that obfuscate/modify LLM-generated text, and verify whether those techniques make GPT detectors less confident that the text is human-written.
 
-## Prompt History
-
-1. After each user message, archive it in `prompt_history/PROMPTS_HISTORY.md`.
-2. Every archived block must include date + time only (no timezone suffix), e.g. `YYYY-MM-DD HH:MM:SS`.
-3. Assign exactly one primary intention tag for each user message (optionally add secondary tags).
-4. Use only tags from this list: `dialog`, `question`, `code_review`, `execution`, `retrieval`, `planning`, `debugging`, `creative`, `transformation`.
-
-### Non-Negotiable Prompt History Rules
-
-1. Copied user messages must be copied exactly as written.
-2. Never summarize user messages.
-3. Never correct user typos/grammar in archived user messages.
-4. Only summarize agent messages.
-5. Prompt history must look like a chat and use the exact structure below.
-
-### Required Format
-
-````md
-# Prompt History
-
-<date + timestamp>
-USER:
-```text
-<user message copied exactly>
-```
-TAGS: [<primary_tag>, <optional_secondary_tag>]
----
-<date + timestamp>
-AGENT:
-```text
-<summarized message>
-```
----
-````
-
 ## Development Workflow
 
 1. Pull the next task from `TASKS.md` (`Queue` section).

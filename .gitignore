@@ -206,10 +206,6 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-# Prompt history add-on workspace
-prompt_history/.task_history_venv/
-prompt_history/runs/
-
 # Kaggle credentials and local secrets
 kaggle_key.json
 kaggle.json

@@ -1,1 +1,0 @@
-# HTML-only prompt history rendering currently uses Python stdlib only.
