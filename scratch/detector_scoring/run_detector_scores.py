@@ -12,7 +12,7 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 
 @dataclass(frozen=True)
@@ -49,8 +49,13 @@ class ModelRunSpec:
 
 DEFAULT_DATASETS: tuple[DatasetSpec, ...] = (
     DatasetSpec(dataset_id="hc3", split="all_train"),
-    DatasetSpec(dataset_id="kaggle_llm_detect_ai_generated_text", split="train"),
     DatasetSpec(dataset_id="grid", split="filtered"),
+)
+
+DEFAULT_MODEL_RUN_IDS: tuple[str, ...] = (
+    "aigc_detector_env3",
+    "seqxgpt:gpt2_medium",
+    "seqxgpt:gpt_j_6b",
 )
 
 DETECTOR_ADAPTERS: dict[str, tuple[str, str]] = {
@@ -93,6 +98,15 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         default=Path("scratch/detector_scoring/results/raw_scores.jsonl"),
         help="Output JSONL path for streaming detector scores.",
     )
+    parser.add_argument(
+        "--model-runs",
+        nargs="+",
+        default=list(DEFAULT_MODEL_RUN_IDS),
+        help=(
+            "Run ids to score. Default: aigc_detector_env3, seqxgpt:gpt2_medium, seqxgpt:gpt_j_6b. "
+            "For seqxgpt variants use format seqxgpt:<variant_id>."
+        ),
+    )
     return parser
 
 
@@ -109,12 +123,16 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def _load_examples(project_root: Path, examples_per_label: int) -> list[Example]:
+def _load_examples(
+    project_root: Path,
+    examples_per_label: int,
+    dataset_specs: Sequence[DatasetSpec],
+) -> list[Example]:
     by_label: dict[str, list[Example]] = {"human": [], "ai": []}
 
     for label in ("human", "ai"):
         collected = 0
-        for dataset in DEFAULT_DATASETS:
+        for dataset in dataset_specs:
             source_path = (
                 project_root
                 / "data"
@@ -162,10 +180,10 @@ def _load_examples(project_root: Path, examples_per_label: int) -> list[Example]
     return by_label["human"] + by_label["ai"]
 
 
-def _build_model_runs(project_root: Path) -> list[ModelRunSpec]:
+def _build_model_runs(project_root: Path, selected_run_ids: Sequence[str]) -> list[ModelRunSpec]:
     config_dir = project_root / "configs" / "detectors"
     config_paths = sorted(config_dir.glob("*.detector.json"))
-    runs: list[ModelRunSpec] = []
+    discovered_runs: list[ModelRunSpec] = []
 
     for config_path in config_paths:
         config_data = json.loads(config_path.read_text(encoding="utf-8"))
@@ -194,7 +212,7 @@ def _build_model_runs(project_root: Path) -> list[ModelRunSpec]:
                     "variant_id": variant_id,
                     "max_supported_vram_gb": float(estimated_vram_gb),
                 }
-                runs.append(
+                discovered_runs.append(
                     ModelRunSpec(
                         run_id=run_id,
                         detector_id=detector_id,
@@ -205,7 +223,7 @@ def _build_model_runs(project_root: Path) -> list[ModelRunSpec]:
                     )
                 )
         else:
-            runs.append(
+            discovered_runs.append(
                 ModelRunSpec(
                     run_id=detector_id,
                     detector_id=detector_id,
@@ -216,7 +234,27 @@ def _build_model_runs(project_root: Path) -> list[ModelRunSpec]:
                 )
             )
 
-    return runs
+    run_by_id: dict[str, ModelRunSpec] = {}
+    for run in discovered_runs:
+        if run.run_id in run_by_id:
+            raise ValueError(f"Duplicate run_id discovered: {run.run_id}")
+        run_by_id[run.run_id] = run
+
+    selected_runs: list[ModelRunSpec] = []
+    missing_run_ids: list[str] = []
+    for run_id in selected_run_ids:
+        selected = run_by_id.get(run_id)
+        if selected is None:
+            missing_run_ids.append(run_id)
+            continue
+        selected_runs.append(selected)
+
+    if missing_run_ids:
+        available = ", ".join(sorted(run_by_id))
+        missing = ", ".join(missing_run_ids)
+        raise ValueError(f"Unknown run_id(s): {missing}. Available run_ids: {available}")
+
+    return selected_runs
 
 
 def _load_detector_class(module_name: str, class_name: str) -> type[Any]:
@@ -280,8 +318,12 @@ def main() -> int:
     project_root = args.project_root.resolve()
     output_path = (project_root / args.output_jsonl).resolve()
 
-    examples = _load_examples(project_root=project_root, examples_per_label=args.examples_per_label)
-    model_runs = _build_model_runs(project_root=project_root)
+    examples = _load_examples(
+        project_root=project_root,
+        examples_per_label=args.examples_per_label,
+        dataset_specs=DEFAULT_DATASETS,
+    )
+    model_runs = _build_model_runs(project_root=project_root, selected_run_ids=args.model_runs)
 
     meta_record: dict[str, Any] = {
         "record_type": "meta",
@@ -290,6 +332,7 @@ def main() -> int:
             {"dataset_id": spec.dataset_id, "split": spec.split}
             for spec in DEFAULT_DATASETS
         ],
+        "selected_model_runs": list(args.model_runs),
         "examples_per_label": args.examples_per_label,
         "examples": _examples_to_records(examples),
     }

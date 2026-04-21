@@ -24,7 +24,8 @@ docker-score:
 	$(DOCKER_COMPOSE) run --rm $(DOCKER_SERVICE) \
 		python scratch/detector_scoring/run_detector_scores.py \
 		--project-root . \
-		--examples-per-label 30
+		--examples-per-label 30 \
+		--model-runs aigc_detector_env3 seqxgpt:gpt2_medium seqxgpt:gpt_j_6b
 
 docker-summarize:
 	$(DOCKER_COMPOSE) run --rm $(DOCKER_SERVICE) \

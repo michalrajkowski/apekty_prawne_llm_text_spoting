@@ -24,7 +24,7 @@
       "estimated_vram_gb": 12.0
     }
   ],
-  "device": "cuda",
+  "device": "cuda:0",
   "max_length": 256,
   "local_files_only": false,
   "trust_remote_code": false,

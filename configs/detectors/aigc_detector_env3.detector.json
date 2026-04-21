@@ -1,7 +1,7 @@
 {
   "detector_id": "aigc_detector_env3",
   "model_id": "yuchuantian/AIGC_detector_env3",
-  "device": "cuda",
+  "device": "cuda:0",
   "max_length": 512,
   "ai_label_index": 1,
   "local_files_only": false,

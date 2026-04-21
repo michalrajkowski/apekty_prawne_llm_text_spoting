@@ -47,6 +47,7 @@ make docker-shell
 ```
 
 Inside container, `PYTHONPATH=/workspace/src` is set automatically.
+Docker runtime is pinned to `GPU:0` (`CUDA_VISIBLE_DEVICES=0`, `NVIDIA_VISIBLE_DEVICES=0`) so `GPU:1` stays free.
 
 ### Kaggle Credentials in Docker
 
@@ -81,7 +82,8 @@ make docker-materialize-all
 docker compose run --rm apm \
   python scratch/detector_scoring/run_detector_scores.py \
   --project-root . \
-  --examples-per-label 30
+  --examples-per-label 30 \
+  --model-runs aigc_detector_env3 seqxgpt:gpt2_medium seqxgpt:gpt_j_6b
 
 docker compose run --rm apm \
   python scratch/detector_scoring/summarize_scores.py \
@@ -102,6 +104,8 @@ make docker-plot
 
 `plot_detector_scores.py` now creates separate PNG plots for each model under
 `scratch/detector_scoring/results/by_model/`, with bars ordered as first 30 human samples and then 30 ai samples.
+`run_detector_scores.py` now defaults to HC3 + GriD sources (Kaggle skipped) and these three run ids:
+`aigc_detector_env3`, `seqxgpt:gpt2_medium`, `seqxgpt:gpt_j_6b`.
 
 ### Fast-DetectGPT / Ghostbuster Smoke Validation (Docker)
 

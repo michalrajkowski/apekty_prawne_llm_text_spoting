@@ -9,8 +9,12 @@ services:
     working_dir: /workspace
     stdin_open: true
     tty: true
-    gpus: all
+    gpus:
+      - driver: nvidia
+        device_ids: ["0"]
+        capabilities: [gpu]
     environment:
+      CUDA_VISIBLE_DEVICES: "0"
       PYTHONPATH: /workspace/src
       HF_HOME: /workspace/.cache/huggingface
       HUGGINGFACE_HUB_CACHE: /workspace/.cache/huggingface/hub
