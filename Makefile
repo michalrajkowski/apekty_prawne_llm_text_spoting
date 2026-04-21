@@ -1,7 +1,7 @@
 DOCKER_COMPOSE ?= docker compose
 DOCKER_SERVICE ?= apm
 
-.PHONY: docker-build docker-shell docker-python-version docker-materialize-all docker-score docker-summarize docker-plot
+.PHONY: docker-build docker-shell docker-python-version docker-materialize-all docker-materialize-splits docker-score docker-summarize docker-plot docker-experiment
 
 docker-build:
 	$(DOCKER_COMPOSE) build $(DOCKER_SERVICE)
@@ -20,6 +20,14 @@ docker-materialize-all:
 		--sample-size 100 \
 		--seed 42
 
+docker-materialize-splits:
+	$(DOCKER_COMPOSE) run --rm $(DOCKER_SERVICE) \
+		python -m apm.experiments.split_materialize \
+		--project-root . \
+		--datasets hc3:all_train grid:filtered \
+		--train-ratio 0.7 \
+		--seed 42
+
 docker-score:
 	$(DOCKER_COMPOSE) run --rm $(DOCKER_SERVICE) \
 		python scratch/detector_scoring/run_detector_scores.py \
@@ -36,3 +44,14 @@ docker-plot:
 	$(DOCKER_COMPOSE) run --rm $(DOCKER_SERVICE) \
 		python scratch/detector_scoring/plot_detector_scores.py \
 		--project-root .
+
+docker-experiment:
+	$(DOCKER_COMPOSE) run --rm $(DOCKER_SERVICE) \
+		python -m apm.experiments.runner \
+		--project-root . \
+		--datasets hc3:all_train grid:filtered \
+		--model-runs aigc_detector_env3 seqxgpt:gpt2_medium seqxgpt:gpt_j_6b \
+		--train-examples-per-label 100 \
+		--evaluation-examples-per-label 100 \
+		--threshold-objective balanced_accuracy \
+		--seed 42

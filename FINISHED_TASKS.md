@@ -1,3 +1,45 @@
+## 2026-04-21
+
+### Task 021 - immutable scoring metrics pipeline with calibration/evaluation splits
+- Implemented a real experiment runner with immutable per-run artifacts:
+  - `src/apm/experiments/runner.py`
+  - `src/apm/experiments/matrix.py`
+  - `src/apm/experiments/__init__.py`
+  - `src/apm/cli.py`
+- Added deterministic thresholding + binary metrics module:
+  - `src/apm/metrics/classification.py`
+  - `src/apm/metrics/__init__.py`
+- Added append-only run index and no-overwrite run directories:
+  - `runs/experiments/<run_id>/...`
+  - `runs/experiments/index.jsonl`
+- Added tests for metrics and immutable run artifacts:
+  - `tests/test_metrics_classification.py`
+  - `tests/test_experiment_runner.py`
+- Added Docker make target and docs for the new experiment flow:
+  - `Makefile` (`docker-experiment`)
+  - `README.md`
+- Validation:
+  - targeted tests passed: `5 passed`
+  - runner CLI help validated
+  - one live smoke run completed and persisted immutable artifacts under `runs/experiments/`.
+
+### Task 022 - threshold tuning on explicit train/evaluation splits
+- Upgraded experiment pipeline from fraction-based split to explicit per-label split sizes:
+  - `--train-examples-per-label` (default `100`)
+  - `--evaluation-examples-per-label` (default `100`)
+- Added deterministic split assignment artifact:
+  - `split_assignments.jsonl` with dataset/sample/label/split membership for full run traceability.
+- Added threshold-search diagnostics for reporting:
+  - `thresholds.json` now stores candidate threshold table (`candidate_metrics`) and selected objective details.
+- Updated detector metrics payload keys to match split semantics:
+  - per-detector metrics now include `train` and `evaluation` sections.
+- Updated Docker command defaults and docs:
+  - `Makefile` (`docker-experiment`)
+  - `README.md`
+- Validation:
+  - updated targeted tests passed: `6 passed`
+  - live run validated with new CLI flags and artifact outputs.
+
 ## 2026-04-03
 
 ### Task 013 - reproducible GPU Docker runtime with pinned dependencies

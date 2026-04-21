@@ -107,6 +107,65 @@ make docker-plot
 `run_detector_scores.py` now defaults to HC3 + GriD sources (Kaggle skipped) and these three run ids:
 `aigc_detector_env3`, `seqxgpt:gpt2_medium`, `seqxgpt:gpt_j_6b`.
 
+### Run Immutable Calibration/Evaluation Experiment (Docker)
+
+The main experiment pipeline now lives in `apm.experiments.runner` and writes immutable artifacts
+under `runs/experiments/<run_id>/` (no output overwrite between runs).
+
+```bash
+docker compose run --rm apm \
+  python -m apm.experiments.runner \
+  --project-root . \
+  --datasets hc3:all_train grid:filtered \
+  --model-runs aigc_detector_env3 seqxgpt:gpt2_medium seqxgpt:gpt_j_6b \
+  --train-examples-per-label 100 \
+  --evaluation-examples-per-label 100 \
+  --threshold-objective balanced_accuracy \
+  --seed 42
+```
+
+or:
+
+```bash
+make docker-experiment
+```
+
+Each run persists:
+
+- `split_assignments.jsonl` (deterministic train/evaluation split membership),
+- `raw_predictions.jsonl` (per-text detector scores + predicted labels),
+- `thresholds.json` (train-derived thresholds + candidate threshold diagnostics),
+- `metrics_by_detector.json` (train/evaluation metrics per detector),
+- `metrics_overall.json` (run-level summary),
+- `config_snapshot.json` (frozen run config and resolved detector matrix),
+- append-only `runs/experiments/index.jsonl` (global run index).
+
+### Materialize Fixed Train/Test Dataset Splits (Docker)
+
+Use this once to persist deterministic train/test dataset splits before threshold tuning:
+
+```bash
+docker compose run --rm apm \
+  python -m apm.experiments.split_materialize \
+  --project-root . \
+  --datasets hc3:all_train grid:filtered \
+  --train-ratio 0.7 \
+  --seed 42
+```
+
+or:
+
+```bash
+make docker-materialize-splits
+```
+
+Artifacts are written under:
+
+- `data/interim/splits/<dataset_id>/<source_split>/train/<label>/sampled_records.parquet`
+- `data/interim/splits/<dataset_id>/<source_split>/test/<label>/sampled_records.parquet`
+- `data/interim/splits/<dataset_id>/<source_split>/split_assignments.jsonl`
+- `data/interim/splits/<dataset_id>/<source_split>/split_metadata.json`
+
 ### Fast-DetectGPT / Ghostbuster Smoke Validation (Docker)
 
 Each command validates score separation on HC3 interim data using 10 `human` and 10 `ai` samples
