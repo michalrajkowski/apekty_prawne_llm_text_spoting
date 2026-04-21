@@ -54,7 +54,9 @@ class FakeTokenizer:
         assert return_tensors == "pt"
         assert truncation is True
         assert max_length > 0
-        return FakeBatch({"input_ids": [1, 2, 3], "__text__": text})
+        token_count = max(1, len(str(text).split()))
+        token_ids = list(range(1, token_count + 1))
+        return FakeBatch({"input_ids": token_ids, "__text__": text})
 
 
 class FakeModel:
@@ -76,6 +78,8 @@ class FakeModel:
 
     def __call__(self, **batch: Any) -> Any:
         text = batch["__text__"].lower()
+        if "nanloss" in text:
+            return types.SimpleNamespace(loss=FakeLossValue(float("nan")))
         loss_value = 0.3 if "ai" in text else 1.2
         return types.SimpleNamespace(loss=FakeLossValue(loss_value))
 
@@ -185,3 +189,21 @@ def test_initialize_rejects_variant_above_vram_limit(monkeypatch: pytest.MonkeyP
                 "device": "cuda",
             }
         )
+
+
+def test_predict_single_returns_neutral_score_for_single_token_text(monkeypatch: pytest.MonkeyPatch) -> None:
+    _install_fake_runtime(monkeypatch)
+    detector = SeqXGPTDetector.initialize(config={"device": "cuda", "variant_id": "gpt2_small"})
+
+    score = detector.predict_single("singletoken")
+
+    assert score == 0.5
+
+
+def test_predict_single_returns_neutral_score_for_nonfinite_loss(monkeypatch: pytest.MonkeyPatch) -> None:
+    _install_fake_runtime(monkeypatch)
+    detector = SeqXGPTDetector.initialize(config={"device": "cuda", "variant_id": "gpt2_small"})
+
+    score = detector.predict_single("nanloss text")
+
+    assert score == 0.5

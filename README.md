@@ -166,6 +166,27 @@ Artifacts are written under:
 - `data/interim/splits/<dataset_id>/<source_split>/split_assignments.jsonl`
 - `data/interim/splits/<dataset_id>/<source_split>/split_metadata.json`
 
+### Recover Global/Local Metrics From Existing Raw Scores (Docker)
+
+If scoring finished but threshold/metrics export failed, reuse saved `raw_scores.jsonl` without re-running model inference:
+
+```bash
+docker compose run --rm apm \
+  python -m apm.experiments.global_local_postprocess \
+  --project-root . \
+  --raw-scores-path runs/global_local_experiments/<run_id>/raw_scores.jsonl \
+  --model-runs aigc_detector_env3 seqxgpt:gpt2_medium seqxgpt:gpt_j_6b \
+  --hc3-splits all_train finance_train medicine_train open_qa_train reddit_eli5_train wiki_csai_train \
+  --grid-splits filtered unfiltered \
+  --threshold-objective balanced_accuracy
+```
+
+Or use the wrapper script:
+
+```bash
+./scripts/run_global_local_postprocess.sh runs/global_local_experiments/<run_id>/raw_scores.jsonl
+```
+
 ### Fast-DetectGPT / Ghostbuster Smoke Validation (Docker)
 
 Each command validates score separation on HC3 interim data using 10 `human` and 10 `ai` samples

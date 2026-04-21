@@ -160,11 +160,44 @@ class SeqXGPTDetector(AbstractDetector):
         if hasattr(encoded, "to"):
             encoded = encoded.to(self._device)
         input_ids = encoded["input_ids"]
+        if _token_count(input_ids) <= 1:
+            # Causal LM next-token loss is undefined for single-token inputs.
+            return 0.5
 
-        with self._torch.no_grad():
-            outputs = self._model(**encoded, labels=input_ids)
-        loss_value = float(outputs.loss.detach().cpu().item())
-        return 1.0 / (1.0 + math.exp(loss_value))
+        try:
+            with self._torch.no_grad():
+                outputs = self._model(**encoded, labels=input_ids)
+            loss_value = float(outputs.loss.detach().cpu().item())
+        except (AttributeError, RuntimeError, TypeError, ValueError):
+            return 0.5
+        if not math.isfinite(loss_value):
+            return 0.5
+        return _stable_sigmoid_of_negative(loss_value)
+
+
+def _token_count(input_ids: Any) -> int:
+    """Infer token count from batched token ids for both tensors and lists."""
+
+    shape = getattr(input_ids, "shape", None)
+    if shape is not None and len(shape) >= 1:
+        return int(shape[-1])
+
+    if isinstance(input_ids, Sequence):
+        if input_ids and isinstance(input_ids[0], Sequence):
+            return len(input_ids[0])
+        return len(input_ids)
+
+    raise ValueError("Unsupported input_ids type for token counting.")
+
+
+def _stable_sigmoid_of_negative(value: float) -> float:
+    """Compute sigmoid(-value) with numerical stability."""
+
+    if value >= 0.0:
+        exp_neg = math.exp(-value)
+        return exp_neg / (1.0 + exp_neg)
+    exp_pos = math.exp(value)
+    return 1.0 / (1.0 + exp_pos)
 
 
 def _load_variants(config: Mapping[str, Any]) -> tuple[SeqXGPTVariant, ...]:
