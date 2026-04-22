@@ -7,6 +7,7 @@ services:
         PYTHON_VERSION: "3.13.2"
     image: apm-research:py3.13.2-gpu
     working_dir: /workspace
+    user: "${HOST_UID:?Missing HOST_UID}:${HOST_GID:?Missing HOST_GID}"
     stdin_open: true
     tty: true
     gpus:
@@ -16,6 +17,9 @@ services:
     environment:
       CUDA_VISIBLE_DEVICES: "0"
       PYTHONPATH: /workspace/src
+      USER: ${HOST_USER:-apm}
+      LOGNAME: ${HOST_USER:-apm}
+      TORCHINDUCTOR_CACHE_DIR: /workspace/.cache/torchinductor
       HF_HOME: /workspace/.cache/huggingface
       HUGGINGFACE_HUB_CACHE: /workspace/.cache/huggingface/hub
       TRANSFORMERS_CACHE: /workspace/.cache/huggingface/hub

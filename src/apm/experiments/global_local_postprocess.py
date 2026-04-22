@@ -190,13 +190,13 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--hc3-splits",
-        nargs="+",
+        nargs="*",
         default=list(runner.DEFAULT_HC3_SPLITS),
         help="HC3 source splits included in this experiment.",
     )
     parser.add_argument(
         "--grid-splits",
-        nargs="+",
+        nargs="*",
         default=list(runner.DEFAULT_GRID_SPLITS),
         help="GriD source splits included in this experiment.",
     )
@@ -253,10 +253,8 @@ def _validate_request(request: GlobalLocalPostprocessRequest) -> None:
         raise ValueError(f"raw_scores_path must be a file, got directory: {request.raw_scores_path}")
     if not request.model_run_ids:
         raise ValueError("model_run_ids cannot be empty")
-    if not request.hc3_splits:
-        raise ValueError("hc3_splits cannot be empty")
-    if not request.grid_splits:
-        raise ValueError("grid_splits cannot be empty")
+    if not request.hc3_splits and not request.grid_splits:
+        raise ValueError("At least one of hc3_splits or grid_splits must be non-empty")
 
 
 def _infer_model_run_ids(raw_scores_path: Path) -> tuple[str, ...]:

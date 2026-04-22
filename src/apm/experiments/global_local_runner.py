@@ -232,13 +232,13 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--hc3-splits",
-        nargs="+",
+        nargs="*",
         default=list(DEFAULT_HC3_SPLITS),
         help="HC3 source splits to include in global/local evaluation.",
     )
     parser.add_argument(
         "--grid-splits",
-        nargs="+",
+        nargs="*",
         default=list(DEFAULT_GRID_SPLITS),
         help="GriD source splits to include in global/local evaluation.",
     )
@@ -293,10 +293,8 @@ def _validate_request(request: GlobalLocalExperimentRequest) -> None:
 
     if not request.model_run_ids:
         raise ValueError("model_run_ids cannot be empty")
-    if not request.hc3_splits:
-        raise ValueError("hc3_splits cannot be empty")
-    if not request.grid_splits:
-        raise ValueError("grid_splits cannot be empty")
+    if not request.hc3_splits and not request.grid_splits:
+        raise ValueError("At least one of hc3_splits or grid_splits must be non-empty")
     if request.batch_size <= 0:
         raise ValueError("batch_size must be > 0")
 
@@ -483,6 +481,8 @@ def _evaluate_global_scopes(
 
     tasks: list[tuple[str, Sequence[str], ModelRunSpec]] = []
     for dataset_id, source_splits in scope_specs:
+        if not source_splits:
+            continue
         for model_run in model_runs:
             tasks.append((dataset_id, source_splits, model_run))
 
