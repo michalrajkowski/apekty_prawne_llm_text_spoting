@@ -1,0 +1,8 @@
+{# 
+method: back_trans_pol_eng
+original_behavior: English -> Polish -> English
+note: the original script had two near-identical prompts; this template merges them into one using variables
+#}
+Translate the following {{ source_language | default("text") }} to {{ target_language }} as accurately as possible. Preserve meaning and tone. Return only the translated text.
+
+{{ input_text }}

@@ -1,0 +1,8 @@
+{# 
+method: back_trans_3langs
+source: generate_hc3_back_trans_3langs.sh
+intended_chain: {{ language_chain | default("Polish,Spanish,German,English") }}
+usage: call the same prompt repeatedly with different {{ target_language }}
+input_variable: {{ input_text }}
+#}
+You are a professional translator. Return only translated text.

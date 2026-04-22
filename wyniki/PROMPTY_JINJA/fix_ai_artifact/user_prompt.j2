@@ -1,0 +1,72 @@
+{# 
+method: fix_ai_artifact
+original_behavior: remove typical AI-writing artifacts while preserving meaning and factual claims
+#}
+You are editing text to remove typical AI-writing artifacts.
+
+Before rewriting, do a deliberate internal pass over EVERY checklist item below. Check each one explicitly against the input text.
+
+Checklist (with patterns/examples to detect):
+1) Inflated significance
+- Looks like: ordinary facts framed as historically important.
+- Examples: "marked a pivotal moment", "underscores its lasting significance", "reflects a broader shift".
+
+2) Generic broader-context padding
+- Looks like: vague trend/legacy/identity/society claims with little concrete content.
+- Examples: "contributes to the broader landscape", "symbolizes enduring change", "part of a wider movement".
+
+3) Superficial analysis
+- Looks like: commentary that sounds meaningful but adds little.
+- Examples: "highlighting its importance", "emphasizing its role", "reinforcing its relevance".
+
+4) Promotional / PR tone
+- Looks like: marketing-style language instead of plain description.
+- Examples: "vibrant", "rich cultural heritage", "renowned", "groundbreaking", "showcasing".
+
+5) Weasel wording
+- Looks like: unnamed authority claims.
+- Examples: "experts say", "observers note", "researchers have highlighted".
+
+6) Predictable challenge/future ending
+- Looks like: formulaic closing paragraph.
+- Examples: "Despite these challenges...", "Looking ahead...", "Future efforts may...".
+
+7) Heavy AI vocabulary repetition
+- Watch for repeated words: crucial, pivotal, underscore, highlight, enhance, foster, vibrant, enduring, landscape, showcase, testament, valuable.
+
+8) Avoidance of plain wording
+- Looks like: inflated verbs where plain wording is better.
+- Examples: "serves as" vs "is", "features" vs "has", "stands as" vs "is".
+
+9) Contrast templates
+- Examples: "not just X, but Y", "not merely X, but also Y", "it is not A; it is B".
+
+10) Rule-of-three stacking
+- Examples: "innovation, resilience, and growth", "social, cultural, and economic impact".
+
+11) Forced elegant variation
+- Looks like: repeated renaming of the same entity only to avoid repetition.
+- Example: "the artist" -> "the creative figure" -> "the visionary".
+
+12) Outline-like structure / essay template
+- Typical generated section flow: Background, Significance, Challenges, Future prospects, Conclusion.
+
+13) Over-neat transitions
+- Common starters: "Additionally", "Furthermore", "Moreover", "In summary", "Overall".
+
+14) Assistant/explainer narrator voice
+- Examples: "It is important to note...", "This highlights...", "Overall, this demonstrates...".
+
+Now rewrite the text to sound naturally human, direct, and specific.
+
+Rewrite rules:
+- Preserve core meaning and factual claims.
+- Remove vague filler and empty significance framing.
+- Use plain wording and natural rhythm.
+- Keep similar length unless clear fluff should be removed.
+- Do not add new facts.
+- Output only the revised text.
+- Make the result feel like casual, naturally human writing (not polished assistant prose).
+
+Text to rewrite:
+{{ source_text }}

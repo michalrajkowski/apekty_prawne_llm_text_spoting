@@ -1,57 +1,55 @@
-# Aspekty prawne - 
+# [Tytuł mini-projektu]
 
-## Architecture
+**Autor:** [Michał Rajkowski], nr indeksu: [248821]
 
-Current repository structure and architecture decisions are documented in `ARCHITECTURE.md`.
+**Temat:** [10] — [Detekcja treści generowanych przez AI]
 
-## Submodule Initialization
+**Kurs:** Aspekty prawne, społeczne i etyczne w AI, PWr 2025/2026
 
-This repository vendors detector implementations as Git submodules under `external/detectors/`.
+> Lista tematów: [Zasady zaliczenia — Menu mini-projektów](https://github.com/laugustyniak/ai-ethics-law-course/blob/main/Zasady%20zaliczenia.md#menu-mini-projekt%C3%B3w)
 
-Clone with submodules initialized:
+---
 
-```bash
-git clone --recurse-submodules <repo-url>
-```
+## Cel projektu
 
-If you already cloned without `--recurse-submodules`, run:
+Porównanie dla topowych modeli detekcji AI:
+- jaka jest ich skuteczność na zbiorach benchmarkowych (czy większe modele są dużo lepsze od mniejszych)
+- czy dobór tekstów treningwych do wyznaczenia progów detekcji ma znaczący wpływ na działanie modeli
+- jak różne techniki augmentacji tekstów wpływaja na wyniki tychże modeli
+
+W tym celu postawiłem sobie trzy pytania badawcze:
+
+- **Q1 - Czy dobór danych treningowych pod tuning progu pewności modeli ma znaczący wpływ na ewaluację?**
+
+- **Q2 - Który detektor jest "najlepszy"? Czy są znaczące różnice w ich wynikach?**
+
+- **Q3 - Jak augmentacje tekstów wpływają na detektory-AI?**
+
+## Powiązanie z projektem grupowym
+
+Projekt nie jest powiązany z projektem NW. Wybrałem go ponieważ zainteresował mnie sam temat i chciałem się o nim więcej dowiedzieć, szczególnie o tym jak dobre są detektory AI, które da się postawić lokalnie oraz jak augmentacje tekstu wpływają na ich działanie (czy da się łatwo oszukać te modele). 
+
+## Wymagania
+
+Repozytorium jest przygotowane pod uruchamianie eksperymentów głównie w Dockerze (GPU).
+
+Minimalne wymagania:
+- Linux + Docker + Docker Compose
+- NVIDIA Driver + `nvidia-container-toolkit` (dla uruchamiania modeli na GPU)
+- `git` z obsługą submodułów
+
+Wymagania dodatkowe (tylko gdy chcesz uruchamiać coś lokalnie poza Dockerem):
+- Python 3.10+ i `venv`
+- zależności z `requirements.txt`
+- dla notebooków: `requirements-notebooks.txt`
+
+Inicjalizacja submodułów:
 
 ```bash
 ./scripts/init_submodules.sh
 ```
 
-## Reproducible Docker Runtime (GPU)
-
-Recommended runtime is Docker with GPU support and pinned dependencies.
-
-What is pinned:
-- Python image: `3.13.2`
-- direct dependencies: `requirements.txt` (exact versions)
-- full lock: `requirements.lock.txt` (transitive freeze used by Docker build)
-
-Day-to-day code/config edits do not require rebuilding because the whole repository is bind-mounted into the container.
-Rebuild only when `Dockerfile`/`requirements*.txt` change.
-
-Build and open shell:
-
-```bash
-docker compose build apm
-docker compose run --rm apm
-```
-
-Or via `make` wrappers:
-
-```bash
-make docker-build
-make docker-shell
-```
-
-Inside container, `PYTHONPATH=/workspace/src` is set automatically.
-Docker runtime is pinned to `GPU:0` (`CUDA_VISIBLE_DEVICES=0`, `NVIDIA_VISIBLE_DEVICES=0`) so `GPU:1` stays free.
-
-### Kaggle Credentials in Docker
-
-Create local credential file (gitignored) and keep it in repository root under `.kaggle/`:
+Konfiguracja zbioru Kaggle (opcjonalna):
 
 ```bash
 mkdir -p .kaggle
@@ -59,305 +57,203 @@ cp configs/credentials/kaggle.example.json .kaggle/kaggle.json
 chmod 600 .kaggle/kaggle.json
 ```
 
-### Initialize All Datasets (Docker)
+## Uruchomienie
+
+Najprościej uruchamiać wszystko przez gotowe skrypty z `scripts/`.
+
+1. Zbuduj obraz Docker:
 
 ```bash
-docker compose run --rm apm \
-  python -m apm.data.materialize_all \
-  --project-root . \
-  --config-dir configs/datasets \
-  --sample-size 100 \
-  --seed 42
+make docker-build
+# lub:
+# HOST_UID="$(id -u)" HOST_GID="$(id -g)" HOST_USER="$(id -un)" docker compose build apm
 ```
 
-or:
+2. (Opcjonalnie) Otwórz shell w kontenerze:
 
 ```bash
-make docker-materialize-all
+make docker-shell
 ```
 
-### Run Detector Scoring Experiment (Docker)
+3. Materializacja splitów train/test pod eksperymenty:
 
 ```bash
-docker compose run --rm apm \
-  python scratch/detector_scoring/run_detector_scores.py \
-  --project-root . \
-  --examples-per-label 30 \
-  --model-runs aigc_detector_env3 seqxgpt:gpt2_medium seqxgpt:gpt_j_6b
-
-docker compose run --rm apm \
-  python scratch/detector_scoring/summarize_scores.py \
-  --project-root .
-
-docker compose run --rm apm \
-  python scratch/detector_scoring/plot_detector_scores.py \
-  --project-root .
+./scripts/run_global_local_pipeline.sh
 ```
 
-or:
+4. Główne eksperymenty global/local (3 detektory: `aigc_detector_env3`, `seqxgpt:gpt2_medium`, `seqxgpt:gpt_j_6b`):
 
 ```bash
-make docker-score
-make docker-summarize
-make docker-plot
+./scripts/run_global_local_experiments.sh
 ```
 
-`plot_detector_scores.py` now creates separate PNG plots for each model under
-`scratch/detector_scoring/results/by_model/`, with bars ordered as first 30 human samples and then 30 ai samples.
-`run_detector_scores.py` now defaults to HC3 + GriD sources (Kaggle skipped) and these three run ids:
-`aigc_detector_env3`, `seqxgpt:gpt2_medium`, `seqxgpt:gpt_j_6b`.
-
-### Run Immutable Calibration/Evaluation Experiment (Docker)
-
-The main experiment pipeline now lives in `apm.experiments.runner` and writes immutable artifacts
-under `runs/experiments/<run_id>/` (no output overwrite between runs).
-
-```bash
-docker compose run --rm apm \
-  python -m apm.experiments.runner \
-  --project-root . \
-  --datasets hc3:all_train grid:filtered \
-  --model-runs aigc_detector_env3 seqxgpt:gpt2_medium seqxgpt:gpt_j_6b \
-  --train-examples-per-label 100 \
-  --evaluation-examples-per-label 100 \
-  --threshold-objective balanced_accuracy \
-  --seed 42
-```
-
-or:
-
-```bash
-make docker-experiment
-```
-
-Each run persists:
-
-- `split_assignments.jsonl` (deterministic train/evaluation split membership),
-- `raw_predictions.jsonl` (per-text detector scores + predicted labels),
-- `thresholds.json` (train-derived thresholds + candidate threshold diagnostics),
-- `metrics_by_detector.json` (train/evaluation metrics per detector),
-- `metrics_overall.json` (run-level summary),
-- `config_snapshot.json` (frozen run config and resolved detector matrix),
-- append-only `runs/experiments/index.jsonl` (global run index).
-
-### Materialize Fixed Train/Test Dataset Splits (Docker)
-
-Use this once to persist deterministic train/test dataset splits before threshold tuning:
-
-```bash
-docker compose run --rm apm \
-  python -m apm.experiments.split_materialize \
-  --project-root . \
-  --datasets hc3:all_train grid:filtered \
-  --train-ratio 0.7 \
-  --seed 42
-```
-
-or:
-
-```bash
-make docker-materialize-splits
-```
-
-Artifacts are written under:
-
-- `data/interim/splits/<dataset_id>/<source_split>/train/<label>/sampled_records.parquet`
-- `data/interim/splits/<dataset_id>/<source_split>/test/<label>/sampled_records.parquet`
-- `data/interim/splits/<dataset_id>/<source_split>/split_assignments.jsonl`
-- `data/interim/splits/<dataset_id>/<source_split>/split_metadata.json`
-
-### Recover Global/Local Metrics From Existing Raw Scores (Docker)
-
-If scoring finished but threshold/metrics export failed, reuse saved `raw_scores.jsonl` without re-running model inference:
-
-```bash
-docker compose run --rm apm \
-  python -m apm.experiments.global_local_postprocess \
-  --project-root . \
-  --raw-scores-path runs/global_local_experiments/<run_id>/raw_scores.jsonl \
-  --model-runs aigc_detector_env3 seqxgpt:gpt2_medium seqxgpt:gpt_j_6b \
-  --hc3-splits all_train finance_train medicine_train open_qa_train reddit_eli5_train wiki_csai_train \
-  --grid-splits filtered unfiltered \
-  --threshold-objective balanced_accuracy
-```
-
-Or use the wrapper script:
+5. Postprocess (jeśli scoring się zakończył, ale metryki trzeba odtworzyć z `raw_scores.jsonl`):
 
 ```bash
 ./scripts/run_global_local_postprocess.sh runs/global_local_experiments/<run_id>/raw_scores.jsonl
 ```
 
-### Fast-DetectGPT / Ghostbuster Smoke Validation (Docker)
-
-Each command validates score separation on HC3 interim data using 10 `human` and 10 `ai` samples
-from `data/interim/datasets/hc3/all_train/`, and writes JSON output under `runs/detectors/`.
+6. Raporty Q1/Q2 (wykresy + tabele markdown/csv):
 
 ```bash
-docker compose run --rm apm \
-  python -m apm.detectors.adapters.fast_detectgpt_smoke \
-  --project-root . \
-  --samples-per-label 10 \
-  --hc3-split all_train
-
-docker compose run --rm apm \
-  python -m apm.detectors.adapters.ghostbuster_smoke \
-  --project-root . \
-  --samples-per-label 10 \
-  --hc3-split all_train
+./scripts/run_global_local_q1_q2_report.sh --run-id <run_id>
 ```
 
-## Dataset Ingestion Foundation
-
-Universal dataset ingestion foundations are implemented in `src/apm/data/`:
-
-- canonical record schema and typed load request/result models (`src/apm/types.py`),
-- registry-backed universal loader (`src/apm/data/hf_loader.py`),
-- deterministic default random sampling with explicit seed (`src/apm/data/sampling.py`),
-- canonical validation helpers (`src/apm/data/validation.py`),
-- storage path/metadata helpers for normalized artifacts (`src/apm/data/storage.py`).
-
-Dataset config schema and template:
-
-- `configs/datasets/schema.md`
-- `configs/datasets/template.dataset.json`
-
-Normalized artifacts convention:
-
-- raw snapshot directories: `data/raw/datasets/<dataset_id>/<split>/`
-- raw class-partitioned snapshots: `data/raw/datasets/<dataset_id>/<split>/<label>/sampled_records.jsonl`
-- normalized split outputs: `data/interim/datasets/<dataset_id>/<split>.parquet`
-- normalized class-partitioned outputs: `data/interim/datasets/<dataset_id>/<split>/<label>/sampled_records.parquet`
-- metadata sidecar: `data/interim/datasets/<dataset_id>/<split>.metadata.json`
-
-## HC3 Materialization
-
-HC3 adapter configuration and field audit:
-
-- `configs/datasets/hc3.dataset.json`
-- `configs/datasets/hc3_field_audit.md`
-
-Materialize sampled HC3 outputs (default: balanced `100 human + 100 ai` per selector where available, deterministic `seed=42`):
+7. Scenariusze augmentacji HC3 (Q3):
 
 ```bash
-PYTHONPATH=src python -m apm.data.adapters.hc3_materialize \
-  --project-root . \
-  --config configs/datasets/hc3.dataset.json \
-  --sample-size 100 \
-  --seed 42
+./scripts/run_augmented_hc3_materialize.sh
+./scripts/run_augmented_hc3_analysis.sh --run-id <run_id>
+./scripts/run_augmented_hc3_score_shift_report.sh --run-id <run_id>
+./scripts/run_augmented_hc3_similarity_report.sh --run-id <run_id>
+./scripts/run_augmented_hc3_jiwer_report.sh --run-id <run_id>
 ```
 
-## Kaggle LLM Detect AI Generated Text Materialization
 
-Kaggle adapter configuration and field audit:
 
-- `configs/datasets/kaggle_llm_detect_ai_generated_text.dataset.json`
-- `configs/datasets/kaggle_llm_detect_ai_generated_text_field_audit.md`
+## Co zrobiono (krótki opis)
 
-Materialize sampled Kaggle outputs (default: `100` per configured split, deterministic `seed=42`):
+### **MODELE**
 
-```bash
-PYTHONPATH=src python -m apm.data.adapters.kaggle_llm_detect_ai_generated_text_materialize \
-  --project-root . \
-  --config configs/datasets/kaggle_llm_detect_ai_generated_text.dataset.json \
-  --sample-size 100 \
-  --seed 42
-```
+Wybrałem trzy modele do detekcji tekstów generowanych przez AI:
+- `aigc_detector_env3` - `https://huggingface.co/yuchuantian/AIGC_detector_env3`
+- `seqxgpt:gpt2_medium` - `https://huggingface.co/openai-community/gpt2-medium`
+- `seqxgpt:gpt_j_6b` - `https://huggingface.co/EleutherAI/gpt-j-6b`
 
-## GriD Materialization
+Wybrałem je bo miały różną liczbę parametrów (rozmiarem modelu) + różniły się sposobem detekcji.
 
-GriD adapter configuration and field audit:
+### **DANE**
 
-- `configs/datasets/grid.dataset.json`
-- `configs/datasets/grid_field_audit.md`
+`Human ChatGPT Comparison Corpus` - `https://huggingface.co/datasets/Hello-SimpleAI/HC3`
+`madlab-ucr/GriD` - `https://github.com/madlab-ucr/GriD`
 
-Download-only bootstrap command:
+Pierwotnie wybrałem 3 datasety, łącznie z jednym z Kaggle. Ale dataset kaggle okazał się mieć testy bardzo wysokiej jakości ale prawie wszystkie należały do jednej klasy, więc nie skorzystałem z niego w finalnych obliczeniach. 
 
-```bash
-PYTHONPATH=src python -m apm.data.adapters.grid_download \
-  --project-root . \
-  --config configs/datasets/grid.dataset.json
-```
+Najlepszym zbiorem okazał się `HC3` ponieważ posiadał podział danych na dodatkowe kategorie (`finance`, `medicine`, `open_qa`, `reddit_eli5`, `wiki_csai`). 
 
-Materialize sampled GriD outputs (default: balanced `100 human + 100 ai` per split where available):
+### **EKSPERYMENTY**
 
-```bash
-PYTHONPATH=src python -m apm.data.adapters.grid_materialize \
-  --project-root . \
-  --config configs/datasets/grid.dataset.json \
-  --sample-size 100 \
-  --seed 42
-```
+Podzieliłem dane na split 50% train / 50% test. 
+Dodatkowo zbiory train/test posiadały swoje osobne pod-splity ze względu na kategorię danych. 
 
-Kaggle/HC3 materializers support `--sampling-strategy`:
+Ze zbioru `hc3` uzyskano dla każdego splitu `train` i `test` po **842** (421 human, 421 ai) teksty dla każdej pod-kategorii. 
 
-- `balanced_random` (default): target `sample-size` per label (`human`, `ai`)
-- `random`: legacy total-random sampling behavior
+| Zbiór                   |              Train |               Test |
+| ----------------------- | -----------------: | -----------------: |
+| `hc3:all_train`         | 421 human + 421 ai | 421 human + 421 ai |
+| `hc3:finance_train`     | 421 human + 421 ai | 421 human + 421 ai |
+| `hc3:medicine_train`    | 421 human + 421 ai | 421 human + 421 ai |
+| `hc3:open_qa_train`     | 421 human + 421 ai | 421 human + 421 ai |
+| `hc3:reddit_eli5_train` | 421 human + 421 ai | 421 human + 421 ai |
+| `hc3:wiki_csai_train`   | 421 human + 421 ai | 421 human + 421 ai |
+| `grid:filtered`         |   50 human + 50 ai |   50 human + 50 ai |
+| `grid:unfiltered`       |   50 human + 50 ai |   50 human + 50 ai |
 
-If configured source files are missing, Kaggle adapter/materializer will auto-download them using the
-`download` block from dataset config. Prerequisites:
+Nastepnie przeprowadziłem eksperymenty z detekcją na tych danych.
 
-- `kaggle` CLI installed,
-- valid Kaggle credentials in `~/.kaggle/kaggle.json`.
+#### Test modeli na różnych progach predykcji AI/HUMAN
 
-Credential bootstrap for this repository:
+Głównym celem było tunowanie tresholdu detektorów na całościowym zbiorze train oraz osobno na splitach pod-kategorii zbioru train, a nastepnie dla tych tresholdów dokonanie predykcji AI/HUMAN dla całościowego zbioru test oraz splitów zbioru test. W ten sposób mogliśmy sprawdzić:
+- czy to na czym wybieramy treshold ma znaczenie
+- jak bardzo wartość tresholdu wpływa na wyniki
+- jak wyniki modeli różnią się międzysoba. 
 
-1. Copy template:
-```bash
-cp configs/credentials/kaggle.example.json configs/credentials/kaggle.json
-```
-2. Fill real values in `configs/credentials/kaggle.json` (this file is gitignored).
-3. Install to Kaggle CLI location:
-```bash
-mkdir -p ~/.kaggle
-cp configs/credentials/kaggle.json ~/.kaggle/kaggle.json
-chmod 600 ~/.kaggle/kaggle.json
-```
+#### Wpływ augmentacji na wyniki
 
-Download-only bootstrap command:
+Wysamplowano losowo dane ze zbioru HC aby otworzyć próbki train/test z podziałem na HUMAN/AI. Otrzymano:
 
-```bash
-PYTHONPATH=src python -m apm.data.adapters.kaggle_llm_detect_ai_generated_text_download \
-  --project-root . \
-  --config configs/datasets/kaggle_llm_detect_ai_generated_text.dataset.json
-```
+|          | HUMAN |  AI |
+| -------- | ----: | --: |
+| HC_TRAIN |   100 | 100 |
+| HC_TEST  |   100 | 100 |
 
-## Bulk Dataset Init
+Następnie dla tych próbek przeprowadzono za pomocą modelu `gpt-oss-20b` 5 rodzajów augmentacji generując nowe sztuczne dane zarówno dla HUMAN jak i AI. 
 
-Initialize/materialize all supported datasets discovered in `configs/datasets/*.dataset.json`:
+Wykonano 5 augmentacji tekstów
 
-```bash
-PYTHONPATH=src python -m apm.data.materialize_all \
-  --project-root . \
-  --config-dir configs/datasets \
-  --sample-size 100 \
-  --seed 42
-```
+- `back_trans_pol_eng` - translacja tekstu na inny język i spowrotem (ENG -> Polish -> ENG)
+- `back_trans_3langs` - back-translation tekstu przez 3 języki (EN -> Polish -> Spanish -> German -> EN)
+- `back_trans_5langs` - back-translacja tekstu przez 5 języków (EN -> Polish -> Spanish -> German -> French -> Czech -> EN)
+- `fewshot` - generowanie nowych tekstów metodą few-shot - dla każdej próbki wybierane są losowo trzy teksty i pokazywane jako przykłady. Następnie model ma stworzyć podobny do nich nowy tekst.
+- `fix_ai_artifact` - na podstawie guidelines z wikipedii na temat detekcji tekstów AI model jest instruowany, żeby poprawićtekst i uniknąć wykrycia tych błędów. 
+- `hasty` - model wprowadza do tekstu literówki i drobne błędy ortograficzne oraz zmienia szyk zdań tak aby tekst bardziej przypominał pisany przez człowieka. 
 
-In bulk mode, `--sample-size` is interpreted as per-label target for balanced sampling.
+Odpowiednie prompty zamieszczono w `wyniki/PROMPTY_JINJA`.
 
-Limit execution to selected dataset ids:
+Finalnie otrzymano nastepujące dane:
 
-```bash
-PYTHONPATH=src python -m apm.data.materialize_all \
-  --project-root . \
-  --config-dir configs/datasets \
-  --datasets hc3
-```
+|                    | HUMAN |  AI |
+| ------------------ | ----: | --: |
+| HC_TRAIN |   100 | 100 |
+| HC_TEST  |   100 | 100 |
+| back_trans_3langs  |   100 | 100 |
+| back_trans_5langs  |   100 | 100 |
+| back_trans_pol_eng |   100 | 100 |
+| fewshot            |   100 | 100 |
+| fix_ai_artifact    |   100 | 100 |
+| hasty              |   100 | 100 |
 
-Or provide a dataset-id list file (`#` comments allowed):
+Następnie dokonano tuning modeli na zbiorze train, wyznaczono baseline-wyniki dla test oraz zmierzono jak z tresholdami z train modele poradziły sobie na augmentowanych tekstach. 
 
-```bash
-PYTHONPATH=src python -m apm.data.materialize_all \
-  --project-root . \
-  --config-dir configs/datasets \
-  --datasets-file configs/datasets/datasets_to_init.example.txt
-```
+## Wyniki
 
-## Propozycja tematu prowadzącego
+### Q1 - Czy dobór danych treningowych pod tuning progu pewności modeli ma znaczący wpływ na ewaluację?
 
-10. Detekcja treści generowanych przez AI
-Narzędzie lub eksperyment badający wykrywalność treści wygenerowanych przez AI.
+![](wyniki/Q1/treshold_matrix_BA_for_models/q1_threshold_profile_by_detector.png)
 
-- **Base**: Porównanie 2-3 detektorów (GPTZero, Originality.ai, watermarking) na zbiorze tekstów ludzkich i AI-generowanych. Metryki.
-- **Good**: + analiza jak parafrazowanie/prompty wpływają na wykrywalność, confusion matrix, wnioski prawne (plagiat, prawo autorskie).
-- **Excellent**: + własny prosty klasyfikator (fine-tuned lub statystyczny), porównanie z komercyjnymi, analiza implikacji dla edukacji/publikacji.
+
+![](wyniki/Q1/treshold_matrix_BA_for_models/q1_relative_delta_matrix_aigc_detector_env3.png)
+![](wyniki/Q1/treshold_matrix_BA_for_models/q1_relative_delta_matrix_seqxgpt_gpt_j_6b.png)
+![](wyniki/Q1/treshold_matrix_BA_for_models/q1_relative_delta_matrix_seqxgpt_gpt2_medium.png)
+
+
+### Q2 - Który detektor jest "najlepszy"? Czy są znaczące różnice w ich wynikach?
+
+![](wyniki/Q2/q2_detector_balanced_accuracy_by_split.png)
+![](wyniki/Q2/q2_global_threshold_error_dumbbell_by_split.png)
+
+
+### Q3 - Jak augmentacje tekstów wpływają na detektory-AI?
+
+Typy augmentacji
+
+---
+
+#### Podobieństwo tekstów syntaktyczne (WER / CER)
+
+![](wyniki/Q3/CER_WER/cer_bars.png)
+
+![](wyniki/Q3/CER_WER/wer_bars.png)
+
+---
+
+#### Podobieństwo tekstów semantyczne
+
+![](wyniki/Q3/texts_similarities/similarity_bars_grouped.png)
+
+---
+
+#### Wpływ augmentacji na wyniki modeli
+
+![](wyniki/Q3/modles_predictions_and_augmentations/thin_bars_combined_baseline_vs_aug_both_aigc_detector_env3.png)
+
+![](wyniki/Q3/modles_predictions_and_augmentations/thin_bars_combined_baseline_vs_aug_both_seqxgpt_gpt_j_6b.png)
+
+![](wyniki/Q3/modles_predictions_and_augmentations/thin_bars_combined_baseline_vs_aug_both_seqxgpt_gpt2_medium.png)
+
+
+
+## Wnioski merytoryczne
+
+[Kluczowa sekcja — co wynika z analizy w kontekście prawa / etyki / regulacji AI? Konkretne obserwacje i rekomendacje.]
+
+## Ograniczenia
+
+- Wybór modeli - Przetestowano małą liczbę modeli i nie były to modele duże. Sam wybór modeli był też troche przypadkowy i kierowałem się tym, które sprawdziły się dobrze na małej próbcę evaluacyjnej danych. 
+- Augmentacje tekstów - wszystkie augmentacje zostały wykonane LLM'em. Projekt możnaby rozważyć o zmiany stworzone przez człowieka (np. napisanie tekstu własnymi słowami) i sprawdzenie czy bazująć na źródle AI samo przepisanie przez człowieka jest już wystarczające.
+- Dobór tekstów - niestety wszystkie obliczenia bazowały pierwotnie na tekstach benchmarkowych. Zabrakło jakis autorskich tekstów, ale uznałem, że nie jestem w stanie w rozsądnym czasie sam wytworzyć takiej liczby próbek (100+ tekstów) aby wyniki były choć minimalnie miarodajne.
+- W repozytorium zastosowano ekstremalny vibe-coding.
+
+## Źródła
+
+- [Nazwa źródła](URL) — krótki opis

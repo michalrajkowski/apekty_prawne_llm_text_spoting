@@ -1,0 +1,14 @@
+{# 
+method: fewshot
+original_behavior: generate exactly one new text from few-shot examples
+note: {{ examples_block }} should already contain formatted examples, e.g.
+Example 1 (source: ...):
+...
+#}
+You are given {{ num_fewshot_examples }} example texts from class '{{ style_label }}'.
+Generate exactly one NEW text that is similar in topic, tone, style, and writing quality.
+Do not copy phrases verbatim from the examples.
+Do not mention that you used examples.
+Output only the generated text, no title, no quotes, no bullet list.
+
+{{ examples_block }}

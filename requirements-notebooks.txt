@@ -1,0 +1,6 @@
+# Minimal dependencies for analysis notebooks only.
+# Intentionally unpinned to avoid coupling with experiment/runtime stack.
+ipykernel
+numpy
+pandas
+matplotlib
