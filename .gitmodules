@@ -10,3 +10,6 @@
 [submodule "external/detectors/synthid_text"]
 	path = external/detectors/synthid_text
 	url = https://github.com/google-deepmind/synthid-text.git
+[submodule "external/vllm_data_oversampler"]
+	path = external/vllm_data_oversampler
+	url = https://github.com/michalrajkowski/vllm_data_oversampler
